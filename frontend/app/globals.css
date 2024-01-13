@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Mono&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body::-webkit-scrollbar{
+    display: none;
+}
+body {
+    font-family: 'Roboto Mono', monospace;
+    font-family: 'Roboto', sans-serif;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+/* Example styles - adjust as needed */
+.windowO {
+    animation: windowOpen ease-in-out 300ms forwards;
+}
+
+.windowC {
+    animation: windowClose ease-in-out 300ms forwards;
+}
+
+/* Example styles - adjust as needed */
+.windowO,
+.windowC {
+    z-index: 10;
+}
+
+.quickO {
+    animation: quickOpen ease-in-out 300ms forwards;
+}
+
+.quickC {
+    animation: quickClose ease-in-out 300ms forwards;
+}
+
+/* Example styles - adjust as needed */
+.quickO,
+.quickC {
+    z-index: 10;
+}
+
+
+@keyframes windowOpen {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes windowClose {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes quickOpen {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes quickClose {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(100%);
+    }
+}
