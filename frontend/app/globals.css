@@ -23,6 +23,15 @@ body {
     animation: windowClose ease-in-out 300ms forwards;
 }
 
+.windowORev {
+    animation: windowOpenRev ease-in-out 300ms forwards;
+}
+
+.windowCRev {
+    animation: windowCloseRev ease-in-out 300ms forwards;
+}
+
+
 /* Example styles - adjust as needed */
 .windowO,
 .windowC {
@@ -61,6 +70,25 @@ body {
         transform: translateX(100%);
     }
 }
+
+@keyframes windowOpenRev {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes windowCloseRev {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
 
 @keyframes quickOpen {
     from {

@@ -3,10 +3,11 @@
 'use client';
 
 import React, { useState } from 'react';
+import StarRating from '../StarRating/StarRating';
 
 interface Props {
     isSale?: Boolean;
-    rating?: number;
+    rating: number;
     name: string;
     price: string;
     url: string;
@@ -18,7 +19,7 @@ export default function ItemBox({ name, price, url, isSale, rating }: Props) {
         <div
             onMouseEnter={() => setShowQuick(true)}
             onMouseLeave={() => setShowQuick(false)}
-            className='w-fit m-auto flex flex-col p-4 lg:p-0 my-4'>
+            className='max-w-[400px] w-full md:w-fit m-auto flex flex-col p-4 lg:p-0 my-4'>
             <div
                 className='relative flex flex-col overflow-hidden'>
                 {isSale && (
@@ -27,6 +28,7 @@ export default function ItemBox({ name, price, url, isSale, rating }: Props) {
                     </div>
                 )}
                 <img
+                    className='w-full'
                     src={url}
                     alt="Product"
                 />
@@ -39,7 +41,7 @@ export default function ItemBox({ name, price, url, isSale, rating }: Props) {
             </div>
 
             <div
-                className='flex flex-col text-center my-5'>
+                className='flex flex-col text-center mt-5 mb-2'>
                 <h1 className='text-2xl font-bold'>
                     I'm the Product
                 </h1>
@@ -51,7 +53,9 @@ export default function ItemBox({ name, price, url, isSale, rating }: Props) {
                 </h1>
             </div>
 
-            <div>
+            <div className='my-2 flex gap-4 items-center justify-center text-[25px]'>
+                <StarRating rating={rating} />
+                <h1 className='text-sm text-gray-500'>{rating}</h1>
             </div>
 
             <div
