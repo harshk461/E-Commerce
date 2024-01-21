@@ -4,6 +4,10 @@ import './globals.css'
 import Navbar from './Components/Navbar/Navbar'
 import Footer from './Components/Footer/Footer'
 import { Toaster } from 'react-hot-toast'
+import PathHeader from './Utils/PathHeader/PathHeader'
+import { usePathname } from 'next/navigation'
+
+
 
 const inter = Inter({ subsets: ['latin'] })
 

@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import React, { useState } from 'react'
 import Loader from '../Utils/Loader/Loader';
+import { usePathname } from 'next/navigation';
+import PathHeader from '../Utils/PathHeader/PathHeader';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const [type, setType] = useState('');
@@ -37,31 +39,37 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { title: 'Small Animals', url: '/shop/small-animals' },
     ];
 
+    const path = usePathname();
+
     return (
-        <div className='w-full h-screen flex gap-4 p-4'>
-            <div className='hidden lg:flex w-[250px] h-full items-start flex-col px-6'>
-                <h1 className='text-2xl font-semibold text-center'>Browser By</h1>
-                <div className='w-[90%] h-1 p-[0.5px] bg-black my-[15px]'></div>
+        <div className='w-full h-screen flex flex-col'>
+            <PathHeader path={path} />
+            <div className='w-full h-screen flex gap-4 p-4'>
+                <div className='hidden lg:flex w-[250px] h-full items-start flex-col px-6'>
+                    <h1 className='text-2xl font-semibold text-center'>Browser By</h1>
+                    <div className='w-[90%] h-1 p-[0.5px] bg-black my-[15px]'></div>
 
-                <div className='w-full flex flex-col gap-2 text-sm'>
-                    {types.map((item, i) => (
-                        <Link
-                            href={item.url}
-                            onClick={() => setType(item.title)}
-                            key={i}>{item.title}</Link>
-                    ))}
-                </div>
-
-                <div className='w-full flex flex-col my-[30px]'>
-                    <div className='text-3xl mb-2'>
-                        Filter
+                    <div className='w-full flex flex-col gap-2 text-sm'>
+                        {types.map((item, i) => (
+                            <Link
+                                className='cursor-pointer hover:text-blue-500 duration-200 transition'
+                                href={item.url}
+                                onClick={() => setType(item.title)}
+                                key={i}>{item.title}</Link>
+                        ))}
                     </div>
-                    <div className='w-[100%] h-[1px] bg-black mb-[15px]'></div>
-                    <div className='w-[100%] h-[1px] bg-black my-[15px]'></div>
+
+                    <div className='w-full flex flex-col my-[30px]'>
+                        <div className='text-3xl mb-2'>
+                            Filter
+                        </div>
+                        <div className='w-[100%] h-[1px] bg-black mb-[15px]'></div>
+                        <div className='w-[100%] h-[1px] bg-black my-[15px]'></div>
+                    </div>
                 </div>
-            </div>
-            <div className='w-full'>
-                {children}
+                <div className='w-full'>
+                    {children}
+                </div>
             </div>
             {/* <Loader /> */}
         </div>

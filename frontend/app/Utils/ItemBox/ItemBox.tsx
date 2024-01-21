@@ -2,10 +2,14 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import StarRating from '../StarRating/StarRating';
+import ItemHover from '../ItemHover/ItemHover';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface Props {
+    id: string;
     isSale?: Boolean;
     rating: number;
     name: string;
@@ -13,10 +17,16 @@ interface Props {
     url: string;
 }
 
-export default function ItemBox({ name, price, url, isSale, rating }: Props) {
+export default function ItemBox({ id, name, price, url, isSale, rating }: Props) {
     const [showQuick, setShowQuick] = useState(false);
+    const [openQuick, setOpenQuick] = useState(false);
+    useEffect(() => {
+        console.log(openQuick);
+    }, [openQuick])
+    const path = usePathname();
     return (
-        <div
+        <Link
+            href={`${'/product/' + id}`}
             onMouseEnter={() => setShowQuick(true)}
             onMouseLeave={() => setShowQuick(false)}
             className='max-w-[400px] w-full md:w-fit m-auto flex flex-col p-4 lg:p-0 my-4'>
@@ -28,12 +38,13 @@ export default function ItemBox({ name, price, url, isSale, rating }: Props) {
                     </div>
                 )}
                 <img
-                    className='w-full'
+                    className='w-full hover:cursor-pointer'
                     src={url}
                     alt="Product"
                 />
 
                 <div
+                    onClick={() => setOpenQuick(true)}
                     className={`absolute bottom-0 left-0 right-0 text-center bg-white text-lg py-2 bg-opacity-55 filter drop-shadow-m cursor-pointer
                         ${showQuick ? 'quickO' : 'quickC'}`}>
                     Quick View
@@ -65,6 +76,17 @@ export default function ItemBox({ name, price, url, isSale, rating }: Props) {
                     Add to Cart
                 </button>
             </div>
-        </div>
+
+            {openQuick && <ItemHover
+                id='123456'
+                name={"I'm Product"}
+                price={'$ 12.00'}
+                isSale={true}
+                rating={4}
+                window={setOpenQuick}
+                desc={"Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe quidem culpa non assumenda dicta ipsum nisi magni ipsam perferendis nesciunt."}
+                url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg'
+            />}
+        </Link>
     );
 }

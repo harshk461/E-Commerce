@@ -6,6 +6,7 @@ import PathHeader from '@/app/Utils/PathHeader/PathHeader'
 import useBase from '@/app/hooks/useBase';
 import axios from 'axios';
 import { setRequestMeta } from 'next/dist/server/request-meta';
+import { usePathname } from 'next/navigation';
 import React, { useRef, useState } from 'react'
 import toast from 'react-hot-toast';
 import OTPInput from 'react-otp-input';
@@ -64,7 +65,7 @@ export default function ForgotPassword() {
     }
     return (
         <div className='w-full h-full flex flex-col'>
-            <PathHeader path={["Auth", "Forgot Password"]} />
+            <PathHeader path={usePathname()} />
             <div className='w-full h-[150px] bg-[url("/cover.jpeg")] bg-cover bg-no-repeat'>
                 <div className='w-full h-full bg-black bg-opacity-40 text-center flex justify-center items-center text-white text-xl font-semibold'>
                     Forgot Password

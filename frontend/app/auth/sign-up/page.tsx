@@ -3,12 +3,13 @@
 import PathHeader from '@/app/Utils/PathHeader/PathHeader'
 import { Eye } from 'lucide-react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import React from 'react'
 
 export default function SignUp() {
     return (
         <div className='w-full flex flex-col'>
-            <PathHeader path={["Auth", "Customer Register"]} />
+            <PathHeader path={usePathname()} />
             <div className='w-full h-[150px] bg-[url("/cover.jpeg")] bg-cover bg-no-repeat'>
                 <div className='w-full h-full bg-black bg-opacity-40 text-center flex justify-center items-center text-white text-xl font-semibold'>
                     Customer Register

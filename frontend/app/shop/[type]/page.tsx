@@ -219,36 +219,42 @@ export default function Type() {
 
             <div className='w-full grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
                 <ItemBox
+                    id='123456'
                     name="I'm Product"
                     price='$ 12.00'
                     isSale={true}
                     rating={4}
                     url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg' />
                 <ItemBox
+                    id='123456'
                     name="I'm Product"
                     price='$ 12.00'
                     isSale={true}
                     rating={4}
                     url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg' />
                 <ItemBox
+                    id='123456'
                     name="I'm Product"
                     price='$ 12.00'
                     isSale={true}
                     rating={4}
                     url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg' />
                 <ItemBox
+                    id='123456'
                     name="I'm Product"
                     price='$ 12.00'
                     isSale={true}
                     rating={4}
                     url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg' />
                 <ItemBox
+                    id='123456'
                     name="I'm Product"
                     price='$ 12.00'
                     isSale={true}
                     rating={4}
                     url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg' />
                 <ItemBox
+                    id='123456'
                     name="I'm Product"
                     price='$ 12.00'
                     isSale={true}
