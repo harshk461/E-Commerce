@@ -1,5 +1,6 @@
 'use client'
 
+import PathHeader from '@/app/Utils/PathHeader/PathHeader'
 import { Eye } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
@@ -7,7 +8,8 @@ import React from 'react'
 export default function SignUp() {
     return (
         <div className='w-full flex flex-col'>
-            <div className='w-full h-[150px] bg-[url("assets/cover.jpeg")] bg-cover bg-no-repeat'>
+            <PathHeader path={["Auth", "Customer Register"]} />
+            <div className='w-full h-[150px] bg-[url("/cover.jpeg")] bg-cover bg-no-repeat'>
                 <div className='w-full h-full bg-black bg-opacity-40 text-center flex justify-center items-center text-white text-xl font-semibold'>
                     Customer Register
                 </div>

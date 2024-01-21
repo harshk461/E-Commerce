@@ -8,8 +8,8 @@ import React from 'react'
 export default function Login() {
     return (
         <div className='w-full flex flex-col'>
-            <PathHeader path='Auth / Customer login' />
-            <div className='w-full h-[150px] bg-[url("assets/cover.jpeg")] bg-cover bg-no-repeat'>
+            <PathHeader path={["Auth", "Customer Login"]} />
+            <div className='w-full h-[150px] bg-[url("/cover.jpeg")] bg-cover bg-no-repeat'>
                 <div className='w-full h-full bg-black bg-opacity-40 text-center flex justify-center items-center text-white text-xl font-semibold'>
                     Customer Login
                 </div>
@@ -51,7 +51,7 @@ export default function Login() {
 
                         <Link
                             className='text-gray-600'
-                            href={"/"}>Forgot Password?</Link>
+                            href={"/auth/forgot-password"}>Forgot Password?</Link>
                     </div>
                 </div>
 

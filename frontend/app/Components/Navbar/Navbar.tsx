@@ -6,7 +6,7 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 
 export default function Navbar() {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState<Boolean | null>(null);
 
     return (
         <div className='relative w-full '>
@@ -36,7 +36,7 @@ export default function Navbar() {
 
                 <div className='lg:hidden border-2 rounded-lg p-2 w-fit'>
                     <Menu
-                        onClick={() => setOpen(!open)} />
+                        onClick={() => setOpen(true)} />
                 </div>
             </div>
 
@@ -65,14 +65,16 @@ export default function Navbar() {
             </div>
 
             {/* Menu */}
-            <div className={`fixed left-0 top-0 w-full h-screen flex-col z-50 bg-gray-600 bg-opacity-55
-    ${open ? 'windowO flex' : 'windowC'}`}>
+            <div className={`fixed lg:hidden left-0 top-0 w-full h-screen flex-col z-50 bg-gray-600 bg-opacity-55
+    ${open === true && 'windowO flex'}
+    ${open === false && 'windowC'}
+    ${open === null && 'hidden'}`}>
                 <div className='w-full md:w-1/2 h-full flex flex-col gap-4 p-4 text-black self-end items-end'>
                     <div>
                         <X
                             size={50}
                             className='p-2 rounded-lg border-2 border-black bg-white'
-                            onClick={() => setOpen(!open)} />
+                            onClick={() => setOpen(false)} />
                     </div>
 
                     <div className='text-lg font-semibold px-4 py-2 bg-teal-400 rounded-lg'>
