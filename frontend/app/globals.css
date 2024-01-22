@@ -4,6 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Remove the range controls from number input */
+input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
+  }
+  
+  /* Remove the range controls from number input for newer browsers */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
 body::-webkit-scrollbar{
     display: none;
 }
@@ -52,6 +64,12 @@ body {
     z-index: 9;
 }
 
+/* Add this to your CSS or in the component style tag */
+.slick-slider {
+    display: flex;
+    flex-direction: row;
+  }
+  
 
 @keyframes windowOpen {
     from {

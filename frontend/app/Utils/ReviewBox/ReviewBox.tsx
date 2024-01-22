@@ -11,7 +11,7 @@ interface Props {
 
 export default function ReviewBox({ user, date, rating, review }: Props) {
     return (
-        <div className='w-[400px] p-4 rounded-lg border-2 border-gray-200 flex flex-col gap-2'>
+        <div className='max-w-full w-[400px] p-4 rounded-lg border-2 border-gray-200 flex flex-col gap-2'>
             <div className='flex gap-2 items-center text-[16px]'>
                 <h1>{user}</h1>
                 <Dot size={20} />

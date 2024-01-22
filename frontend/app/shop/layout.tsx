@@ -1,5 +1,7 @@
 'use client'
 
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
 import Link from 'next/link';
 import React, { useState } from 'react'
 import Loader from '../Utils/Loader/Loader';
@@ -38,11 +40,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { title: 'Small Animal Toys', url: '/shop/small-animal-toys' },
         { title: 'Small Animals', url: '/shop/small-animals' },
     ];
-
+    const [rangeValues, setRangeValues] = useState([10, 80]);
     const path = usePathname();
 
     return (
-        <div className='w-full h-screen flex flex-col'>
+        <div className='w-full h-full flex flex-col'>
             <PathHeader path={path} />
             <div className='w-full h-screen flex gap-4 p-4'>
                 <div className='hidden lg:flex w-[250px] h-full items-start flex-col px-6'>
@@ -64,6 +66,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                             Filter
                         </div>
                         <div className='w-[100%] h-[1px] bg-black mb-[15px]'></div>
+                        <Slider
+                            range
+                            min={0}
+                            max={100}
+                            value={rangeValues}
+                            onChange={(val) => setRangeValues(val)}
+                        />
+                        <p>Selected Range: {rangeValues[0]} - {rangeValues[1]}</p>
+                        {/* <div className='flex justify-between'>
+                            <h1>{priceRange.start}</h1>
+                            <h1>{priceRange.end}</h1>
+                        </div> */}
                         <div className='w-[100%] h-[1px] bg-black my-[15px]'></div>
                     </div>
                 </div>
@@ -72,6 +86,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </div>
             </div>
             {/* <Loader /> */}
-        </div>
+        </div >
     )
 }

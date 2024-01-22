@@ -77,7 +77,7 @@ export default function page() {
   return (
     <div className='w-full min-h-screen flex flex-col overflow-x-hidden'>
       <PathHeader
-        path={['Home']} />
+        path="Home" />
       <HeaderSlider />
       <div className='w-full h-fit flex-col lg:flex-row flex flex-wrap p-4 gap-10'>
         {Shopdata.map((item, i) => (

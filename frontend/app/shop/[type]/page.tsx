@@ -217,7 +217,7 @@ export default function Type() {
                 ))}
             </div>
 
-            <div className='w-full grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+            <div className='w-full h-full grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
                 <ItemBox
                     id='123456'
                     name="I'm Product"
