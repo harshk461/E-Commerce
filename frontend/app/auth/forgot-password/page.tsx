@@ -9,7 +9,6 @@ import { setRequestMeta } from 'next/dist/server/request-meta';
 import { usePathname } from 'next/navigation';
 import React, { useRef, useState } from 'react'
 import toast from 'react-hot-toast';
-import OTPInput from 'react-otp-input';
 
 export default function ForgotPassword() {
     const [showInitialWindow, setShowInitialWindow] = useState(false);

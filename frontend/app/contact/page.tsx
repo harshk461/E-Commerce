@@ -19,7 +19,7 @@ export default function Contact() {
     });
 
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setData((pre) => ({
             ...pre,
@@ -27,7 +27,7 @@ export default function Contact() {
         }))
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
             setLoading(true);

@@ -71,7 +71,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                             min={0}
                             max={100}
                             value={rangeValues}
-                            onChange={(val) => setRangeValues(val)}
+                        // onChange={(val) => setRangeValues(val)}
                         />
                         <p>Selected Range: {rangeValues[0]} - {rangeValues[1]}</p>
                         {/* <div className='flex justify-between'>

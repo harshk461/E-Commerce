@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Rating } from 'react-simple-star-rating'
 import StarRating from '../StarRating/StarRating';
 
 export default function NewReview() {
@@ -17,7 +16,7 @@ export default function NewReview() {
             rating: rate,
         }));
     }
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setData((pre) => ({
             ...pre,
