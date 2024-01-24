@@ -2,8 +2,10 @@
 'use client'
 
 import AlsoLike from '@/app/Utils/AlsoLike/AlsoLike';
+import Loader from '@/app/Utils/Loader/Loader';
 import NewReview from '@/app/Utils/NewReview/NewReview';
 import PathHeader from '@/app/Utils/PathHeader/PathHeader';
+import ProductImageSlider from '@/app/Utils/ProductImageSlider/ProductImageSlider';
 import ReviewBox from '@/app/Utils/ReviewBox/ReviewBox';
 import StarRating from '@/app/Utils/StarRating/StarRating';
 import useBase from '@/app/hooks/useBase';
@@ -13,20 +15,32 @@ import { useParams, usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
 
-interface Product {
+interface ProductData {
     name: string;
     description: string;
-    image: string;
-    rating: number;
+    images: {
+        url: string,
+        public_id: string,
+    }[];
+    ratings: number;
+    price: number;
+    reviews: {
+        user: string;
+        rating: number;
+        // date: string;
+        review: string;
+        message: string;
+    }[];
 }
 
 export default function Page() {
-    const [productData, setProductData] = useState({
-        "name": "I'm Product",
-        "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Error expedita nihil quo dolorem architecto esse omnis rerum, eveniet delectus cumque!",
-        "image": "https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg",
-        "price": '$ 12.00',
-        "rating": 4,
+    const [productData, setProductData] = useState<ProductData>({
+        'description': '',
+        'images': [],
+        "name": '',
+        "price": 0,
+        "ratings": 0,
+        "reviews": []
     });
     const { product_id } = useParams();
     const path = usePathname();
@@ -42,13 +56,14 @@ export default function Page() {
         const getProduct = async () => {
             try {
                 setLoading(true);
-                await axios.get(url + "/product/" + product_id)
+                await axios.get(url + "/products/get/one/" + product_id)
                     .then(res => {
-                        if (res.data.status === 'error') {
+                        if (res.data.status === "error") {
                             toast.error("Product Not Found");
                             navigate.replace("/");
                             return;
                         }
+                        console.log(res.data);
                         setProductData(res.data);
                     })
             }
@@ -60,7 +75,7 @@ export default function Page() {
             }
         }
 
-        // getProduct();
+        getProduct();
     }, [])
     return (
         <div className='w-full flex flex-col'>
@@ -68,19 +83,17 @@ export default function Page() {
             <div className='max-w-full w-[900px] m-auto my-[50px] flex gap-[20px] flex-col justify-center items-center'>
                 <div className='w-full flex flex-col lg:flex-row gap-[50px] justify-center items-center lg:items-start p-4'>
                     <div className='max-w-full w-[400px]'>
-                        <img
-                            className='max-w-full w-[400px] h-[400px] rounded-md shadow-lg shadow-blue-100'
-                            src={productData.image}
-                            alt={productData.name} />
-
-                        <h1 className='mt-[20px]'>{productData.description}</h1>
+                        {productData && productData.images && productData.images.length > 0 && (
+                            <ProductImageSlider images={productData.images} />
+                        )}
+                        {productData && <h1 className='mt-[20px]'>{productData.description}</h1>}
                     </div>
 
                     <div className='max-w-full w-[400px] flex flex-col items-center lg:items-start'>
                         <h1 className='text-3xl font-bold'>{productData.name}</h1>
                         <div className='my-2 flex gap-4 items-center justify-center text-[30px]'>
-                            <StarRating rating={productData.rating} />
-                            <h1 className='text-sm text-gray-500'>{productData.rating}</h1>
+                            <StarRating rating={productData.ratings} />
+                            <h1 className='text-sm text-gray-500'>{productData.ratings}</h1>
                         </div>
                         <h1 className='text-sm text-gray-400'>SKU:{product_id}</h1>
 
@@ -161,16 +174,22 @@ export default function Page() {
                     </div>
                 </div>
 
-                <div className='max-w-full w-full p-4'>
-                    {/* <ReviewBox
-                        user='Harsh'
-                        rating={4}
-                        date='01-01-2024'
-                        review='Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam obcaecati voluptate tempora cum, ullam tenetur veniam similique sed doloribus provident modi quidem ratione sint rerum iste, iusto, illum explicabo quos.' /> */}
-                    <NewReview />
+                <div className='max-w-full w-full p-4 flex flex-wrap justify-between'>
+                    {productData.reviews.map((item, i) => (
+                        <ReviewBox
+                            key={i}
+                            user={item.user}
+                            rating={item.rating}
+                            date={"01-01-2024"}
+                            review={item.message}
+                        />
+                    ))}
+
+                    {/* <NewReview /> */}
                 </div>
             </div>
             <AlsoLike />
+            {loading && <Loader />}
         </div>
     )
 }

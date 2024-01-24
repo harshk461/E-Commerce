@@ -7,46 +7,49 @@ import StarRating from '../StarRating/StarRating';
 import ItemHover from '../ItemHover/ItemHover';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import ProductImageSlider from '../ProductImageSlider/ProductImageSlider';
 
 interface Props {
     id: string;
     isSale?: Boolean;
     rating: number;
     name: string;
-    price: string;
-    url: string;
+    price: number;
+    url: {
+        public_id: string,
+        url: string,
+    }[];
 }
 
 export default function ItemBox({ id, name, price, url, isSale, rating }: Props) {
-    const [showQuick, setShowQuick] = useState(false);
+    const [showQuick, setShowQuick] = useState<Boolean | null>(null);
     const [openQuick, setOpenQuick] = useState(false);
-    useEffect(() => {
-        console.log(openQuick);
-    }, [openQuick])
     const path = usePathname();
     return (
         <Link
             href={`${'/product/' + id}`}
             onMouseEnter={() => setShowQuick(true)}
             onMouseLeave={() => setShowQuick(false)}
-            className='max-w-[400px] w-full md:w-fit m-auto flex flex-col p-4 lg:p-0 my-4'>
+            className='max-w-full w-[400px] m-auto flex flex-col md:p-4 my-4'>
             <div
                 className='relative flex flex-col overflow-hidden'>
                 {isSale && (
-                    <div className='absolute top-0 left-0 py-1 px-4 bg-green-800 font-semibold text-white text-sm'>
+                    <div className='absolute top-0 left-0 px-4 py-1 bg-green-800 font-semibold text-white text-sm mt-2 w-fit'>
                         Sale
                     </div>
                 )}
-                <img
-                    className='w-full hover:cursor-pointer'
-                    src={url}
-                    alt="Product"
-                />
+
+                {url && url.length > 0 && (
+                    <img
+                        className='max-w-full w-[400px] h-full m-auto'
+                        src={url[0].url}
+                        alt="" />
+                )}
 
                 <div
                     onClick={() => setOpenQuick(true)}
                     className={`absolute bottom-0 left-0 right-0 text-center bg-white text-lg py-2 bg-opacity-55 filter drop-shadow-m cursor-pointer
-                        ${showQuick ? 'quickO' : 'quickC'}`}>
+                        ${showQuick === true && 'quickO'} ${showQuick === false && 'quickC'}`}>
                     Quick View
                 </div>
             </div>
@@ -54,13 +57,13 @@ export default function ItemBox({ id, name, price, url, isSale, rating }: Props)
             <div
                 className='flex flex-col text-center mt-5 mb-2'>
                 <h1 className='text-2xl font-bold'>
-                    I'm the Product
+                    {name}
                 </h1>
                 <div className='w-[40px] m-auto h-[3px] bg-gray-500 my-1'>
 
                 </div>
                 <h1 className='text-md text-gray-500'>
-                    $ 12.00
+                    {price}
                 </h1>
             </div>
 
@@ -78,14 +81,14 @@ export default function ItemBox({ id, name, price, url, isSale, rating }: Props)
             </div>
 
             {openQuick && <ItemHover
-                id='123456'
-                name={"I'm Product"}
-                price={'$ 12.00'}
+                id={id}
+                name={name}
+                price={"price"}
                 isSale={true}
-                rating={4}
+                rating={rating}
                 window={setOpenQuick}
-                desc={"Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe quidem culpa non assumenda dicta ipsum nisi magni ipsam perferendis nesciunt."}
-                url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg'
+                desc={"sdkj"}
+                url={"dsjsd"}
             />}
         </Link>
     );

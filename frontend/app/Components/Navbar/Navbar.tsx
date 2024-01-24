@@ -43,7 +43,7 @@ export default function Navbar() {
             <div className='hidden lg:w-full lg:flex items-center py-8 border-t-2 border-t-black justify-between px-6'>
                 <div className='flex gap-6 text-sm font-semibold'>
                     <Link href={"/shop"}>SHOP ALL</Link>
-                    <Link href={"/shop/dog"}>DOGS</Link>
+                    <Link href={"/shop/dogs"}>DOGS</Link>
                     <Link href={"/shop/cats"}>CATS</Link>
                     <Link href={"/shop/birds"}>BIRDS</Link>
                     <Link href={"/shop/fish"}>FISH</Link>

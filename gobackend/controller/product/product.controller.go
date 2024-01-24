@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	productModel "server.go/models/product.model"
@@ -127,14 +128,24 @@ func GetProductByID(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	productId := vars["product_id"]
+	fmt.Println(productId)
 
-	filter := bson.D{{"_id", productId}}
+	// Convert the productId string to ObjectId
+	objID, err := primitive.ObjectIDFromHex(productId)
+	if err != nil {
+		// If the conversion fails, return an error response
+		errorResponse := map[string]string{"status": "error", "message": "Invalid product ID format"}
+		json.NewEncoder(w).Encode(errorResponse)
+		return
+	}
+
+	filter := bson.D{{"_id", objID}}
 	result := productCollection.FindOne(context.Background(), filter)
 
 	if err := result.Decode(&product); err != nil {
 		// If product not found, return an error response
-		w.WriteHeader(http.StatusNotFound)
-		errorResponse := map[string]string{"error": "Product not found"}
+		// w.WriteHeader(http.StatusNotFound)
+		errorResponse := map[string]string{"status": "error", "message": "Product not found"}
 		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}

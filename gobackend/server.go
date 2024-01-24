@@ -10,6 +10,6 @@ import (
 
 func main() {
 	router := router.Router()
-	fmt.Println("Server Starting at 6000")
-	log.Fatal(http.ListenAndServe(":6000", router))
+	fmt.Println("Server Starting at 3001")
+	log.Fatal(http.ListenAndServe(":3001", router))
 }

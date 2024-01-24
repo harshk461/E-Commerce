@@ -22,9 +22,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { title: 'Cat Toys', url: '/shop/cat-toys' },
         { title: 'Cats', url: '/shop/cats' },
         { title: 'Dog Beds', url: '/shop/dog-beds' },
-        { title: 'Dog Collars', url: '/shop/dog-collars' },
-        { title: 'Dog Food', url: '/shop/dog-food' },
-        { title: 'Dog Toys', url: '/shop/dog-toys' },
+        { title: 'Dog Collars', url: '/shop/dogs-collars' },
+        { title: 'Dog Food', url: '/shop/dogs-food' },
+        { title: 'Dog Toys', url: '/shop/dogs-toys' },
         { title: 'Dogs', url: '/shop/dogs' },
         { title: 'Fish & Aquatics', url: '/shop/fish-aquatics' },
         { title: 'Fish Aquariums', url: '/shop/fish-aquariums' },
@@ -38,7 +38,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { title: 'Small Animal Cages', url: '/shop/small-animal-cages' },
         { title: 'Small Animal Equipment', url: '/shop/small-animal-equipment' },
         { title: 'Small Animal Toys', url: '/shop/small-animal-toys' },
-        { title: 'Small Animals', url: '/shop/small-animals' },
+        { title: 'Small Animals', url: '/shop/small-animal' },
     ];
     const [rangeValues, setRangeValues] = useState([10, 80]);
     const path = usePathname();
@@ -47,7 +47,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className='w-full h-full flex flex-col'>
             <PathHeader path={path} />
             <div className='w-full h-screen flex gap-4 p-4'>
-                <div className='hidden lg:flex w-[250px] h-full items-start flex-col px-6'>
+                <div className='hidden xl:flex w-[200px] h-full items-start flex-col px-6'>
                     <h1 className='text-2xl font-semibold text-center'>Browser By</h1>
                     <div className='w-[90%] h-1 p-[0.5px] bg-black my-[15px]'></div>
 

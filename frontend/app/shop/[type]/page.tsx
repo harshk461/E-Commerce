@@ -1,13 +1,35 @@
 'use client'
 
 import ItemBox from '@/app/Utils/ItemBox/ItemBox';
+import Loader from '@/app/Utils/Loader/Loader';
+import useBase from '@/app/hooks/useBase';
+import axios from 'axios';
 import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import toast from 'react-hot-toast';
+
+interface ProductData {
+    _id: string;
+    name: string;
+    description: string;
+    images: {
+        url: string,
+        public_id: string,
+    }[];
+    ratings: number;
+    price: number;
+    createdAt: string;
+}
+
 
 export default function Type() {
     const { type } = useParams();
+    const url = useBase();
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState<ProductData[]>([]);
+
     const [filterType, setFilterType] = useState(0);
     const filters = ['Recommended', 'Newest', 'Price:(Low to High)', 'Price:(High to Low)', 'Name:(A-Z)', 'Name:(Z-A)'];
     const [filterWindow, setFilterWindow] = useState(false);
@@ -30,8 +52,8 @@ export default function Type() {
         { title: 'Cats', url: '/shop/cats' },
         { title: 'Dog Beds', url: '/shop/dog-beds' },
         { title: 'Dog Collars', url: '/shop/dog-collars' },
-        { title: 'Dog Food', url: '/shop/dog-food' },
-        { title: 'Dog Toys', url: '/shop/dog-toys' },
+        { title: 'Dog Food', url: '/shop/dogs-food' },
+        { title: 'Dog Toys', url: '/shop/dogs-toys' },
         { title: 'Dogs', url: '/shop/dogs' },
         { title: 'Fish & Aquatics', url: '/shop/fish-aquatics' },
         { title: 'Fish Aquariums', url: '/shop/fish-aquariums' },
@@ -45,8 +67,79 @@ export default function Type() {
         { title: 'Small Animal Cages', url: '/shop/small-animal-cages' },
         { title: 'Small Animal Equipment', url: '/shop/small-animal-equipment' },
         { title: 'Small Animal Toys', url: '/shop/small-animal-toys' },
-        { title: 'Small Animals', url: '/shop/small-animals' },
+        { title: 'Small Animals', url: '/shop/small-animal' },
     ];
+
+    useEffect(() => {
+        const getData = async () => {
+            try {
+                setLoading(true);
+                const s = (type as string).split("-").join(" ");
+                console.log(s);
+                await axios.get(url + "/products/get/" + s)
+                    .then(res => {
+                        if (res.data.status === 'error') {
+                            toast.error(res.data.message);
+                            return;
+                        }
+                        setData(res.data);
+                    })
+            }
+            catch (e) {
+                toast.error("Server Error");
+            }
+            finally {
+                setLoading(false);
+            }
+        }
+        getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    useEffect(() => {
+        const filterData = () => {
+            let newData: ProductData[] = [...data];
+
+            switch (filterType) {
+                case 0:
+                    // No filter, set data as is
+                    setData(newData);
+                    break;
+                case 1:
+                    // Newest: Sort by date or any other relevant field
+                    newData.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+                    setData(newData);
+                    break;
+                case 2:
+                    // Price: Low to High
+                    newData.sort((a, b) => a.price - b.price);
+                    setData(newData);
+                    break;
+                case 3:
+                    // Price: High to Low
+                    newData.sort((a, b) => b.price - a.price);
+                    setData(newData);
+                    break;
+                case 4:
+                    // Name: A-Z
+                    newData.sort((a, b) => a.name.localeCompare(b.name));
+                    setData(newData);
+                    break;
+                case 5:
+                    // Name: Z-A
+                    newData.sort((a, b) => b.name.localeCompare(a.name));
+                    setData(newData);
+                    break;
+                default:
+                    // No filter, set data as is
+                    setData(newData);
+                    break;
+            }
+        };
+
+        filterData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filterType])
 
     return (
         <div className='relative w-full h-full flex flex-col lg:p-[50px]'>
@@ -58,7 +151,7 @@ export default function Type() {
             {/* Filter */}
             <div className='hidden lg:flex justify-between items-start text-lg font-semibold my-[30px]'>
                 <div>
-                    Product Count
+                    {data.length + " Products"}
                 </div>
 
                 <div className='hidden relative w-fit lg:flex flex-col items-center'>
@@ -116,7 +209,7 @@ export default function Type() {
             </div>
 
             {/* Mobile Filter */}
-            <div className='flex md:hidden justify-between items-center mt-4 underline text-blue-600'>
+            <div className='flex lg:hidden justify-between items-center mt-4 underline text-blue-600'>
                 <h1
                     onClick={() => setBrowserWindow(!browserWindow)}>
                     Browser</h1>
@@ -198,7 +291,7 @@ export default function Type() {
                 </div>
             </div>
 
-            <div className={`fixed md:hidden top-0 left-0 flex flex-col w-full h-full items-center overflow-scroll pb-[30px] gap-4 bg-black text-white
+            <div className={`fixed lg:hidden top-0 left-0 flex flex-col w-full h-full items-center overflow-scroll pb-[30px] gap-4 bg-black text-white
             bg-opacity-45 z-[11] ${browserWindow ? 'windowORev' : 'windowCRev'}`}>
                 <div className='p-[30px] self-end'>
                     <X
@@ -217,50 +310,20 @@ export default function Type() {
                 ))}
             </div>
 
-            <div className='w-full h-full grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-                <ItemBox
-                    id='123456'
-                    name="I'm Product"
-                    price='$ 12.00'
-                    isSale={true}
-                    rating={4}
-                    url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg' />
-                <ItemBox
-                    id='123456'
-                    name="I'm Product"
-                    price='$ 12.00'
-                    isSale={true}
-                    rating={4}
-                    url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg' />
-                <ItemBox
-                    id='123456'
-                    name="I'm Product"
-                    price='$ 12.00'
-                    isSale={true}
-                    rating={4}
-                    url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg' />
-                <ItemBox
-                    id='123456'
-                    name="I'm Product"
-                    price='$ 12.00'
-                    isSale={true}
-                    rating={4}
-                    url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg' />
-                <ItemBox
-                    id='123456'
-                    name="I'm Product"
-                    price='$ 12.00'
-                    isSale={true}
-                    rating={4}
-                    url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg' />
-                <ItemBox
-                    id='123456'
-                    name="I'm Product"
-                    price='$ 12.00'
-                    isSale={true}
-                    rating={4}
-                    url='https://static.wixstatic.com/media/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg/v1/fill/w_325,h_325,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_9d85bc28b2a848d2811dcf889dcf69f9~mv2.jpg' />
+            <div className='w-full h-full grid lg:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-center'>
+                {/* <div className='w-full h-full grid gap-4 grid-cols-1 md:grid-col-2 xl:grid-col-4'> */}
+                {data.map((item, i) => (
+                    <ItemBox
+                        key={i}
+                        id={item._id}
+                        name={item.name}
+                        price={item.price}
+                        isSale={true}
+                        rating={item.ratings}
+                        url={item.images} />
+                ))}
             </div>
+            {loading && <Loader />}
         </div>
     )
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"server.go/controller/auth"
 	"server.go/controller/product"
 )
@@ -21,5 +22,7 @@ func Router() http.Handler {
 	router.HandleFunc("/products/get/{category}", product.GetProductByCategory).Methods("GET")
 	router.HandleFunc("/products/get/one/{product_id}", product.GetProductByID).Methods("GET")
 	router.HandleFunc("/products/add-review", product.AddReview).Methods("PATCH")
-	return router
+
+	handler := cors.Default().Handler(router)
+	return handler
 }
