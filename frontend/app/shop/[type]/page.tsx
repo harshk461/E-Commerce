@@ -32,9 +32,9 @@ export default function Type() {
 
     const [filterType, setFilterType] = useState(0);
     const filters = ['Recommended', 'Newest', 'Price:(Low to High)', 'Price:(High to Low)', 'Name:(A-Z)', 'Name:(Z-A)'];
-    const [filterWindow, setFilterWindow] = useState(false);
-    const [browserWindow, setBrowserWindow] = useState(false);
-    const [mobileFilterWindow, setMobileFilterWindow] = useState(false);
+    const [filterWindow, setFilterWindow] = useState<Boolean | null>(null);
+    const [browserWindow, setBrowserWindow] = useState<Boolean | null>(null);
+    const [mobileFilterWindow, setMobileFilterWindow] = useState<Boolean | null>(null);
 
     // Convert type to a capitalized title
     const capitalizedTitle = (type as string).split('-').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -211,16 +211,19 @@ export default function Type() {
             {/* Mobile Filter */}
             <div className='flex lg:hidden justify-between items-center mt-4 underline text-blue-600'>
                 <h1
-                    onClick={() => setBrowserWindow(!browserWindow)}>
+                    onClick={() => setBrowserWindow(true)}>
                     Browser</h1>
                 <h1
-                    onClick={() => setMobileFilterWindow(!mobileFilterWindow)}
+                    onClick={() => setMobileFilterWindow(true)}
                 >Filter and Sort</h1>
             </div>
 
             {/* Mobile Filter Window */}
             <div className={`fixed md:hidden top-0 left-0 flex flex-col w-full h-full items-center overflow-scroll pb-[30px] gap-4 bg-black text-white
-            bg-opacity-45 z-[11] ${mobileFilterWindow ? 'windowO' : 'windowC'}`}>
+            bg-opacity-45 z-[11] 
+            ${mobileFilterWindow === true && 'windowO'}
+            ${mobileFilterWindow === false && 'windowC'}
+            ${mobileFilterWindow === null && 'hidden'}`}>
                 <div className='p-[30px] self-end'>
                     <X
                         onClick={() => setMobileFilterWindow(!mobileFilterWindow)}
@@ -232,7 +235,7 @@ export default function Type() {
                 </h1>
 
                 <div
-                    onClick={() => setFilterWindow(!filterWindow)}
+                    onClick={() => setFilterWindow(true)}
                     className='cursor-pointer flex gap-2 items-center text-md'>
                     Sort by: {filters[filterType]} {filterWindow ? <ChevronDown /> : <ChevronUp />}
                 </div>
@@ -292,10 +295,13 @@ export default function Type() {
             </div>
 
             <div className={`fixed lg:hidden top-0 left-0 flex flex-col w-full h-full items-center overflow-scroll pb-[30px] gap-4 bg-black text-white
-            bg-opacity-45 z-[11] ${browserWindow ? 'windowORev' : 'windowCRev'}`}>
+            bg-opacity-45 z-[11]
+             ${browserWindow === true && 'windowORev'}
+             ${browserWindow === false && 'windowCRev'}
+             ${browserWindow === null && 'hidden'}`}>
                 <div className='p-[30px] self-end'>
                     <X
-                        onClick={() => setBrowserWindow(!browserWindow)}
+                        onClick={() => setBrowserWindow(false)}
                         className='border-2 border-white rounded-lg p-2'
                         size={50} />
                 </div>
@@ -324,6 +330,6 @@ export default function Type() {
                 ))}
             </div>
             {loading && <Loader />}
-        </div>
+        </div >
     )
 }

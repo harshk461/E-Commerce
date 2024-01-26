@@ -2,23 +2,31 @@
 
 import React, { useState } from 'react'
 import PathHeader from '../Utils/PathHeader/PathHeader'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import useBase from '../hooks/useBase';
+
+interface ContactData {
+    name: string;
+    email: string;
+    phone: string;
+    message: string;
+
+}
 
 export default function Contact() {
     const path = usePathname();
     const [loading, setLoading] = useState(false);
     const url = useBase();
-    const [data, setData] = useState({
+    const [data, setData] = useState<ContactData>({
         'name': '',
         'email': '',
         'phone': '',
         'message': '',
     });
 
-
+    const navigate = useRouter();
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setData((pre) => ({
@@ -30,13 +38,20 @@ export default function Contact() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
+            if (data.phone.toString().length < 10) {
+                toast.error("Enter Valid Phone");
+                return;
+            }
             setLoading(true);
+            console.log(data);
             await axios.post(url + "/contact", data)
                 .then(res => {
                     if (res.data.status === 'error') {
                         toast.error(res.data.message);
                         return;
                     }
+                    toast.success("Sent");
+                    navigate.replace("/");
                 })
         }
         catch (e) {
@@ -51,7 +66,7 @@ export default function Contact() {
             <PathHeader path={path} />
             <div className='max-w-full w-[900px] m-auto flex flex-col md:my-[100px]'>
                 <div className='w-[90%] m-auto h-[1px] bg-gray-500 mb-[70px]'></div>
-                <div className='w-full flex justify-between items-start'>
+                <div className='w-full flex justify-between items-center md:items-start flex-col p-4 md:flex-row'>
                     <div className='text-5xl font-bold text-blue-600'>
                         Throw us <br />
                         a question,<br />

@@ -6,8 +6,20 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import useBase from '../hooks/useBase';
 
+interface ProductData {
+    _id: string;
+    name: string;
+    price: number;
+    trending: boolean;
+    ratings: number;
+    images: {
+        public_id: string;
+        url: string;
+    }[]
+}
+
 export default function Page() {
-    const [data, setData] = useState([]);
+    const [data, setData] = useState<ProductData[]>([]);
     const [loading, setLoading] = useState(false);
     const url = useBase();
 
@@ -45,7 +57,7 @@ export default function Page() {
                     price={item.price}
                     isSale={item.trending}
                     rating={item.ratings}
-                    url={"https://static.wixstatic.com/media/84770f_fdfcbbaf39ef4bec8302ba850905b910~mv2.jpg/v1/fill/w_351,h_351,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/84770f_fdfcbbaf39ef4bec8302ba850905b910~mv2.jpg"} />
+                    url={item.images} />
             ))}
         </div>
     )

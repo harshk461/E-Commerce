@@ -30,18 +30,18 @@ export default function ItemBox({ id, name, price, url, isSale, rating }: Props)
             href={`${'/product/' + id}`}
             onMouseEnter={() => setShowQuick(true)}
             onMouseLeave={() => setShowQuick(false)}
-            className='max-w-full w-[400px] m-auto flex flex-col md:p-4 my-4'>
+            className='max-w-full m-auto flex flex-col md:p-4 my-4'>
             <div
                 className='relative flex flex-col overflow-hidden'>
                 {isSale && (
                     <div className='absolute top-0 left-0 px-4 py-1 bg-green-800 font-semibold text-white text-sm mt-2 w-fit'>
-                        Sale
+                        Trending
                     </div>
                 )}
 
                 {url && url.length > 0 && (
                     <img
-                        className='max-w-full w-[400px] h-full m-auto'
+                        className='max-w-full h-full m-auto'
                         src={url[0].url}
                         alt="" />
                 )}

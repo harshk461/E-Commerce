@@ -1,12 +1,60 @@
 'use client'
 
+import Loader from '@/app/Utils/Loader/Loader'
 import PathHeader from '@/app/Utils/PathHeader/PathHeader'
+import useBase from '@/app/hooks/useBase'
+import axios from 'axios'
 import { Eye } from 'lucide-react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import React from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import React, { useState } from 'react'
+import toast from 'react-hot-toast'
+
+interface LoginData {
+    email: string;
+    password: string;
+}
 
 export default function Login() {
+    const url = useBase();
+    const [data, setData] = useState<LoginData>({
+        'email': '',
+        'password': '',
+    });
+    const [loading, setLoading] = useState(false);
+    const navigate = useRouter();
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    }
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            setLoading(true);
+            await axios.post(url + "/auth/login", data)
+                .then(res => {
+                    if (res.data.status === 'error') {
+                        toast.error(res.data.message);
+                        return;
+                    }
+                    localStorage.setItem("token", res.data.token);
+                    toast.success("Succesful login");
+                    navigate.replace("/");
+                })
+        }
+        catch (e) {
+            toast.error("Server Error");
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
     return (
         <div className='w-full flex flex-col'>
             <PathHeader path={usePathname()} />
@@ -18,7 +66,11 @@ export default function Login() {
 
             <div className='w-full lg:px-[200px] px-[30px] py-[30px] flex lg:justify-between items-center lg:items-start flex-col gap-[40px] lg:flex-row'>
 
-                <div className='w-full lg:w-1/2 flex flex-col items-start gap-[20px]'>
+                <form
+                    action=""
+                    method='POST'
+                    onSubmit={handleSubmit}
+                    className='w-full lg:w-1/2 flex flex-col items-start gap-[20px]'>
                     <div>
                         <h1 className='text-lg font-semibold'>REGISTERED CUSTOMER</h1>
                         <h1 className='text-md text-gray-500'>If you have an account, sign in with your email address.</h1>
@@ -28,8 +80,12 @@ export default function Login() {
                         <h1>Email<span className='text-red-400'>*</span></h1>
                         <input
                             type="text"
+                            name='email'
+                            value={data.email}
+                            onChange={handleChange}
                             className='w-full px-4 py-2 rounded-md outline-none border-2'
-                            placeholder='Enter Email...' />
+                            placeholder='Enter Email...'
+                            required />
                     </div>
 
                     <div className='flex flex-col w-full gap-2'>
@@ -37,8 +93,12 @@ export default function Login() {
                         <div className='px-4 py-2 rounded-md border-2 flex gap-4'>
                             <input
                                 type="password"
+                                name='password'
+                                value={data.password}
+                                onChange={handleChange}
                                 className='w-full outline-none'
-                                placeholder='Enter Password...' />
+                                placeholder='Enter Password...'
+                                required />
                             <Eye />
                         </div>
                     </div>
@@ -46,6 +106,7 @@ export default function Login() {
 
                     <div className='w-full flex items-center justify-between mt-[15px]'>
                         <button
+                            type='submit'
                             className='px-4 py-2 rounded-lg bg-slate-300'>
                             Sign In
                         </button>
@@ -54,7 +115,7 @@ export default function Login() {
                             className='text-gray-600'
                             href={"/auth/forgot-password"}>Forgot Password?</Link>
                     </div>
-                </div>
+                </form>
 
                 <div className='w-full lg:w-1/3 flex flex-col gap-4 text-start'>
                     <h1 className='text-xl font-semibold'>New  Customers</h1>
@@ -66,8 +127,8 @@ export default function Login() {
                         Create New Account
                     </Link>
                 </div>
-
             </div>
+            {loading && <Loader />}
         </div>
     )
 }

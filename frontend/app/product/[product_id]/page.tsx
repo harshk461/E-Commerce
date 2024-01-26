@@ -31,6 +31,7 @@ interface ProductData {
         review: string;
         message: string;
     }[];
+    stock: number;
 }
 
 export default function Page() {
@@ -40,12 +41,14 @@ export default function Page() {
         "name": '',
         "price": 0,
         "ratings": 0,
-        "reviews": []
+        "reviews": [],
+        "stock": 0,
     });
     const { product_id } = useParams();
     const path = usePathname();
     const url = useBase();
     const [loading, setLoading] = useState(false);
+    const [newReview, setnewReview] = useState<Boolean | null>(null);
     const navigate = useRouter();
     const [window, setWindow] = useState({
         window1: 0,
@@ -82,13 +85,12 @@ export default function Page() {
             <PathHeader path={path} />
             <div className='max-w-full w-[900px] m-auto my-[50px] flex gap-[20px] flex-col justify-center items-center'>
                 <div className='w-full flex flex-col lg:flex-row gap-[50px] justify-center items-center lg:items-start p-4'>
-                    <div className='max-w-full w-[400px]'>
+                    <div className='relative max-w-full w-[400px] flex flex-col'>
                         {productData && productData.images && productData.images.length > 0 && (
                             <ProductImageSlider images={productData.images} />
                         )}
-                        {productData && <h1 className='mt-[20px]'>{productData.description}</h1>}
+                        {productData && <h1 className='absolute -bottom-[105px] text-lg text-black'>{productData.description}</h1>}
                     </div>
-
                     <div className='max-w-full w-[400px] flex flex-col items-center lg:items-start'>
                         <h1 className='text-3xl font-bold'>{productData.name}</h1>
                         <div className='my-2 flex gap-4 items-center justify-center text-[30px]'>
@@ -106,6 +108,11 @@ export default function Page() {
                                 placeholder='#1'
                                 className='w-[70px] h-[40px] rounded-lg pl-2 outline-none bg-gray-200'
                                 type="number" />
+                        </div>
+
+                        <div className='flex items-center mt-4 text-md font-semibold text-gray-500'>
+                            <h1>Stocks:</h1>
+                            <h1>{productData.stock}</h1>
                         </div>
 
                         <button
@@ -175,17 +182,30 @@ export default function Page() {
                 </div>
 
                 <div className='max-w-full w-full p-4 flex flex-wrap justify-between'>
-                    {productData.reviews.map((item, i) => (
-                        <ReviewBox
-                            key={i}
-                            user={item.user}
-                            rating={item.rating}
-                            date={"01-01-2024"}
-                            review={item.message}
-                        />
-                    ))}
+                    {productData.reviews.length === 0 ?
+                        <div className={`${newReview === true && 'hidden'} ${newReview === false && 'flex'} w-full m-auto flex-col justify-center items-center gap-2 mt-[20px]`}>
+                            <h1 className='text-xl'>No Reviews Yet</h1>
+                            <h1 className=''>Share your thoughts. Be the first to leave a review.</h1>
 
-                    {/* <NewReview /> */}
+                            <button
+                                onClick={() => setnewReview(true)}
+                                className='px-8 py-2 rounded-lg border-2 border-blue-500 mt-3'>
+                                Leave a Review
+                            </button>
+                        </div>
+                        :
+                        productData.reviews.map((item, i) => (
+                            <ReviewBox
+                                key={i}
+                                user={item.user}
+                                rating={item.rating}
+                                date={"01-01-2024"}
+                                review={item.message}
+                            />
+                        ))
+                    }
+
+                    {newReview && <NewReview />}
                 </div>
             </div>
             <AlsoLike />

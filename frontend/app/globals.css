@@ -16,11 +16,10 @@ input[type="number"] {
     margin: 0;
   }
 
-body::-webkit-scrollbar{
+*::-webkit-scrollbar{
     display: none;
 }
 body {
-    font-family: 'Roboto Mono', monospace;
     font-family: 'Roboto', sans-serif;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
