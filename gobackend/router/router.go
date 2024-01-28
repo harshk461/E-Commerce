@@ -7,6 +7,7 @@ import (
 	"github.com/rs/cors"
 	"server.go/controller/auth"
 	"server.go/controller/contact"
+	"server.go/controller/order"
 	"server.go/controller/product"
 	"server.go/controller/utils"
 )
@@ -18,6 +19,10 @@ func Router() http.Handler {
 	router.HandleFunc("/auth/login", auth.Login).Methods("POST")
 	router.HandleFunc("/auth/sign-up", auth.SignUp).Methods("POST")
 	router.HandleFunc("/auth/forgot-password", auth.ForgotPassword).Methods("POST")
+	router.HandleFunc("/auth/add-address", auth.AddAddress).Methods("PATCH")
+	router.HandleFunc("/auth/remove-address", auth.RemoveAddress).Methods("PATCH")
+	router.HandleFunc("/auth/add-cart", auth.AddToCart).Methods("PATCH")
+	router.HandleFunc("/auth/remove-cart", auth.RemoveFromCart).Methods("PATCH")
 
 	//product routes
 	router.HandleFunc("/products/get", product.GetAllProducts).Methods("GET")
@@ -27,6 +32,9 @@ func Router() http.Handler {
 
 	//contact
 	router.HandleFunc("/contact", contact.NewMessage).Methods("POST")
+
+	//orders
+	router.HandleFunc("/order/get/{user_id}", order.GetOrders).Methods("GET")
 
 	//utils
 	router.HandleFunc("/utils/{promo}", utils.CheckPromoCode).Methods("GET")

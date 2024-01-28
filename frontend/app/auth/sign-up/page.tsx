@@ -11,6 +11,7 @@ import React, { useState } from 'react'
 import toast from 'react-hot-toast'
 
 interface SignUpData {
+    username: string;
     name: string;
     email: string;
     password: string;
@@ -21,6 +22,7 @@ export default function SignUp() {
     const url = useBase();
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState<SignUpData>({
+        username: '',
         name: '',
         email: '',
         password: '',
@@ -85,6 +87,17 @@ export default function SignUp() {
                     <div>
                         <h1 className='text-lg font-semibold'>SIGN-UP INFORMATION</h1>
                         <h1 className='text-md text-gray-500'>Create new account</h1>
+                    </div>
+                    <div className='flex flex-col w-full gap-2'>
+                        <h1>Username<span className='text-red-400'>*</span></h1>
+                        <input
+                            type="text"
+                            name='username'
+                            value={data.username}
+                            onChange={handleChange}
+                            required
+                            className='w-full px-4 py-2 rounded-md outline-none border-2'
+                            placeholder='Enter Username...' />
                     </div>
 
                     <div className='flex flex-col w-full gap-2'>

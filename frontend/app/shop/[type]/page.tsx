@@ -75,7 +75,7 @@ export default function Type() {
             try {
                 setLoading(true);
                 const s = (type as string).split("-").join(" ");
-                console.log(s);
+                console.log(url + "/products/get/" + s);
                 await axios.get(url + "/products/get/" + s)
                     .then(res => {
                         if (res.data.status === 'error') {

@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import Slider from "react-slick";
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -9,6 +9,10 @@ import ShopBox from './Utils/ShopBox/ShopBox';
 import { Bird, Cat, Dog, FishIcon, Snail } from 'lucide-react';
 import TopChoice from './Utils/TopChoice/TopChoice';
 import PathHeader from './Utils/PathHeader/PathHeader';
+import { useDispatch, useSelector } from 'react-redux';
+import { JwtPayload, jwtDecode } from 'jwt-decode';
+import { useRouter } from 'next/navigation';
+import { login } from './Store/feattures/auth.slice';
 
 interface ShopDataInterface {
   url: string;
@@ -19,7 +23,14 @@ interface ShopDataInterface {
   isLong: Boolean;
 }
 
-export default function page() {
+interface DecodedToken extends JwtPayload {
+  id: string;
+  email: string;
+  username: string;
+}
+
+
+export default function Page() {
   const settings = {
     dots: true,
     infinite: true,
@@ -73,6 +84,24 @@ export default function page() {
     },
   ];
 
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useRouter();
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const data = token ? jwtDecode<DecodedToken>(token) : null;
+    if (token === null) {
+      navigate.replace("/auth/login");
+      return;
+    }
+    const payload = {
+      "email": data?.email,
+      "id": data?.id,
+      "username": data?.username
+    };
+
+    dispatch(login(payload));
+  }, [])
 
   return (
     <div className='w-full min-h-screen flex flex-col overflow-x-hidden'>
@@ -92,6 +121,7 @@ export default function page() {
           />
         ))}
       </div>
+
       <TopChoice />
     </div>
   )

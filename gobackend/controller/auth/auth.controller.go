@@ -12,6 +12,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
@@ -216,4 +217,192 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+type Address struct {
+	UserID      primitive.ObjectID `json:"user_id" bson:"user_id"`
+	Name        string             `json:"name" bson:"name"`
+	Address     string             `json:"address" bson:"address"`
+	City        string             `json:"city" bson:"city"`
+	State       string             `json:"state" bson:"state"`
+	Country     string             `json:"country" bson:"country"`
+	PinCode     int                `json:"pinCode" bson:"pinCode"`
+	PhoneNumber int                `json:"phoneNumber" bson:"phoneNumber"`
+}
+
+func AddAddress(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Methods", "PATCH")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	var Address Address
+	json.NewDecoder(r.Body).Decode(&Address)
+
+	newAddress := authmodel.Address{
+		ID:          primitive.NewObjectID(),
+		Name:        Address.Name,
+		Address:     Address.Address,
+		City:        Address.City,
+		State:       Address.State,
+		Country:     Address.Country,
+		PinCode:     Address.PinCode,
+		PhoneNumber: Address.PhoneNumber,
+	}
+
+	filter := bson.D{{"_id", Address.UserID}}
+	update := bson.D{
+		{"$push", bson.D{
+			{"addresses", newAddress},
+		}},
+	}
+
+	res, err := authCollection.UpdateOne(context.Background(), filter, update)
+
+	if err != nil {
+		msg := map[string]string{"status": "error", "message": "Error During Adding"}
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+
+	if res.ModifiedCount == 0 {
+		msg := map[string]string{"status": "error", "message": "No Matching Document Found"}
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+
+	msg := map[string]string{"status": "success", "message": "Added Successfully"}
+	json.NewEncoder(w).Encode(msg)
+}
+
+type RemoveAddressBody struct {
+	ID        primitive.ObjectID `json:"user_id" bson:"user_id"`
+	AddressID primitive.ObjectID `json:"address_id" bson:"address_id"`
+}
+
+func RemoveAddress(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Methods", "PATCH")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	var body RemoveAddressBody
+
+	json.NewDecoder(r.Body).Decode(&body)
+
+	filter := bson.D{{"_id", body.ID}}
+	update := bson.D{
+		{"$pull", bson.D{
+			{"addresses", bson.D{
+				{"address_id", body.AddressID},
+			}},
+		}},
+	}
+
+	res, err := authCollection.UpdateOne(context.Background(), filter, update)
+
+	if err != nil {
+		msg := map[string]string{"status": "error", "message": "Error During Removing Address"}
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+
+	if res.ModifiedCount == 0 {
+		msg := map[string]string{"status": "error", "message": "No Matching Document Found"}
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+
+	// Return success message
+	msg := map[string]interface{}{"status": "success", "message": "Removed Address Successfully"}
+	json.NewEncoder(w).Encode(msg)
+}
+
+type Cart struct {
+	ID        primitive.ObjectID `json:"user_id" bson:"user_id"`
+	ProductID primitive.ObjectID `json:"product_id" bson:"product_id"`
+	Name      string             `json:"product_name" bson:"product_name"`
+	Price     float64            `json:"price" bson:"price"`
+	Quantity  int                `json:"quantity" bson:"quantity"`
+}
+
+func AddToCart(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Methods", "PATCH")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	var cartDetails Cart
+	json.NewDecoder(r.Body).Decode(&cartDetails)
+
+	cartData := authmodel.CartItem{
+		Name:      cartDetails.Name,
+		ProductID: cartDetails.ProductID,
+		Price:     cartDetails.Price,
+		Quantity:  cartDetails.Quantity,
+	}
+
+	filter := bson.D{{"_id", cartDetails.ID}}
+	update := bson.D{
+		{"$push", bson.D{
+			{"cart", cartData},
+		}},
+	}
+
+	res, err := authCollection.UpdateOne(context.Background(), filter, update)
+
+	if err != nil {
+		msg := map[string]string{"status": "error", "message": "Error During Adding"}
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+
+	if res.ModifiedCount == 0 {
+		msg := map[string]string{"status": "error", "message": "No Matching Document Found"}
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+
+	msg := map[string]string{"status": "success", "message": "Added Successfully"}
+	json.NewEncoder(w).Encode(msg)
+
+}
+
+type RemoveCartBody struct {
+	ID        primitive.ObjectID `json:"user_id" bson:"user_id"`
+	ProductID primitive.ObjectID `json:"product_id" bson:"product_id"`
+}
+
+func RemoveFromCart(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Methods", "PATCH")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	var productDetail RemoveCartBody
+
+	json.NewDecoder(r.Body).Decode(&productDetail)
+
+	filter := bson.D{{"_id", productDetail.ID}}
+	update := bson.D{
+		{"$pull", bson.D{
+			{"cart", bson.D{
+				{"product_id", productDetail.ProductID},
+			}},
+		}},
+	}
+
+	res, err := authCollection.UpdateOne(context.Background(), filter, update)
+
+	if err != nil {
+		msg := map[string]string{"status": "error", "message": "Error During Removing Address"}
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+
+	if res.ModifiedCount == 0 {
+		msg := map[string]string{"status": "error", "message": "No Matching Document Found"}
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+
+	// Return success message
+	msg := map[string]interface{}{"status": "success", "message": "Removed Address Successfully"}
+	json.NewEncoder(w).Encode(msg)
 }
