@@ -19,10 +19,12 @@ func Router() http.Handler {
 	router.HandleFunc("/auth/login", auth.Login).Methods("POST")
 	router.HandleFunc("/auth/sign-up", auth.SignUp).Methods("POST")
 	router.HandleFunc("/auth/forgot-password", auth.ForgotPassword).Methods("POST")
+	router.HandleFunc("/auth/get-address/{user_id}", auth.GetAllAddresses).Methods("GET")
 	router.HandleFunc("/auth/add-address", auth.AddAddress).Methods("PATCH")
 	router.HandleFunc("/auth/remove-address", auth.RemoveAddress).Methods("PATCH")
 	router.HandleFunc("/auth/add-cart", auth.AddToCart).Methods("PATCH")
 	router.HandleFunc("/auth/remove-cart", auth.RemoveFromCart).Methods("PATCH")
+	router.HandleFunc("/auth/get-all-orders/{user_id}", auth.GetAllProductFromCart).Methods("GET")
 
 	//product routes
 	router.HandleFunc("/products/get", product.GetAllProducts).Methods("GET")
@@ -35,11 +37,18 @@ func Router() http.Handler {
 
 	//orders
 	router.HandleFunc("/order/get/{user_id}", order.GetOrders).Methods("GET")
+	router.HandleFunc("/order/get-order/{order_id}", order.GetOrderByOrderID).Methods("GET")
 
 	//utils
 	router.HandleFunc("/utils/{promo}", utils.CheckPromoCode).Methods("GET")
 
-	handler := cors.Default().Handler(router)
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:3000"},
+		AllowedMethods: []string{"GET", "POST", "PATCH", "DELETE"},
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
+	})
+
+	handler := c.Handler(router)
 
 	return handler
 }

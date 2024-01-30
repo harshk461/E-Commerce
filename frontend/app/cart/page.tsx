@@ -1,16 +1,55 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PathHeader from '../Utils/PathHeader/PathHeader'
 import { usePathname } from 'next/navigation'
 import CartProductBox from '../Utils/CartProductBox/CartProductBox'
 import { Lock, Notebook, Tag } from 'lucide-react'
+import axios from 'axios'
+import useBase from '../hooks/useBase'
+import toast from 'react-hot-toast'
+import { jwtDecode } from 'jwt-decode'
+import CartItem from '../Utils/CartItem/CartItem'
+
+interface CartItem {
+    product_id?: string;
+    product_name: string;
+    price: number;
+    quantity?: number;
+    image: string;
+}
+
 
 export default function Cart() {
 
     const [promoWindow, setPromoWindow] = useState<Boolean | null>(false)
     const [noteWindow, setNoteWindow] = useState<Boolean | null>(null)
+    const [orders, setOrders] = useState([]);
+    const url = useBase();
 
+    useEffect(() => {
+        const getOrdersFromCart = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const decodedToken = jwtDecode(token || '') as { id?: string };
+                const { id } = decodedToken;
+                await axios.get(url + "/auth/get-all-orders/" + id)
+                    .then(res => {
+                        if (res.data.status === 'error') {
+                            toast.error(res.data.message);
+                            return;
+                        }
+                        console.log(res.data);
+                        setOrders(res.data);
+                    })
+            }
+            catch (e) {
+                toast.error("Server Error")
+            }
+        }
+
+        getOrdersFromCart()
+    }, [])
     return (
         <div className='w-full h-fit flex flex-col'>
             <PathHeader path={usePathname()} />
@@ -18,8 +57,11 @@ export default function Cart() {
                 <div className='w-full lg:w-2/3 flex flex-col'>
                     <h1 className='text-lg '>My Cart</h1>
                     <div className='w-full h-[2px] bg-gray-300 my-[15px]'></div>
-                    <CartProductBox />
-                    <CartProductBox />
+                    {orders.length > 0 && orders.map((item, i) => (
+                        <CartItem
+                            cart={item}
+                            key={i} />
+                    ))}
                     <div className='w-full h-[2px] bg-gray-300 my-[15px]'></div>
 
                     <div className='flex flex-col'>

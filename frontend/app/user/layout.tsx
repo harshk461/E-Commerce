@@ -2,11 +2,26 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux';
+import { logout } from '../Store/feattures/auth.slice';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const [curr, setCurr] = useState<Number | null>(null);
     const navigate = useRouter();
+    const dispatch = useDispatch();
+
+    const handleLogout = () => {
+        dispatch(logout({}));
+    }
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token === null) {
+            navigate.replace("/");
+            return;
+        }
+    }, [])
     return (
         <div className='max-w-full w-[1300px] m-auto p-4 lg:p-0 flex gap-4 items-start lg:mt-[100px] mt-[50px]'>
             <div className='w-[350px] border-2 border-gray-300 flex-col hidden md:flex'>
@@ -49,6 +64,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <button
                     onClick={() => {
                         setCurr(5);
+                        handleLogout();
                         localStorage.removeItem("token");
                         navigate.replace("/auth/login");
                     }}

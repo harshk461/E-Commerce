@@ -1,14 +1,59 @@
 'use client'
 
+import { RootState } from '@/app/Store/store';
 import CartItem from '@/app/Utils/CartItem/CartItem';
+import useBase from '@/app/hooks/useBase';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 /* eslint-disable react/no-unescaped-entities */
-import { ChevronRight, Cross, Menu, Search, ShoppingCart, X } from 'lucide-react'
+import { ChevronRight, Cross, Menu, Search, ShoppingCart, UserCircle, X } from 'lucide-react'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react'
+import toast from 'react-hot-toast';
+import { useSelector } from 'react-redux';
+
+interface CartItem {
+    product_id?: string;
+    product_name: string;
+    price: number;
+    quantity?: number;
+    image: string;
+}
+
 
 export default function Navbar() {
     const [open, setOpen] = useState<Boolean | null>(null);
     const [cart, setCart] = useState<Boolean | null>(null);
+    const [orders, setOrders] = useState<CartItem[]>([]);
+    const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+    const navigate = useRouter();
+    const url = useBase();
+
+    useEffect(() => {
+        const getOrdersFromCart = async () => {
+            const token = localStorage.getItem('token');
+            const decodedToken = jwtDecode(token || '') as { id?: string };
+            const { id } = decodedToken;
+            try {
+                await axios.get(url + "/auth/get-all-orders/" + id)
+                    .then(res => {
+                        if (res.data.status === 'error') {
+                            toast.error(res.data.message);
+                            return;
+                        }
+                        console.log(res.data);
+                        setOrders(res.data);
+                    })
+            }
+            catch (e) {
+                toast.error("Server Error")
+            }
+        }
+
+        getOrdersFromCart()
+    }, [])
+
     return (
         <div className='relative w-full '>
             {/*Navbar header*/}
@@ -54,14 +99,22 @@ export default function Navbar() {
                 </div>
 
                 <div className='flex gap-4 text-md font-semibold'>
+                    {isAuthenticated ?
+                        <div
+                            onClick={() => navigate.replace("/user")}
+                            className='flex items-center gap-2 cursor-pointer'>
+                            <UserCircle
+                                size={40} />
+                            {/* <h1>{user?.username}</h1> */}
+                        </div>
+                        :
+                        <Link href={"/auth/login"}>Login</Link>}
                     <button
                         onClick={() => setCart(true)}
                         className='relative'>
                         <ShoppingCart size={35} />
                         <p className='absolute -top-3 left-[20px] bg-slate-400 p-1 rounded-full '>0</p>
                     </button>
-
-                    <Link href={"/auth/login"}>Login</Link>
                 </div>
             </div>
 
@@ -79,7 +132,7 @@ export default function Navbar() {
                     </div>
 
                     <div className='text-lg font-semibold px-4 py-2 bg-teal-400 rounded-lg'>
-                        <Link href={"/"}>Login</Link>
+                        <Link href={"/auth/login"}>Login</Link>
                     </div>
 
                     <div className='w-full px-4 py-2 rounded-xl border-2 flex bg-white'>
@@ -119,12 +172,11 @@ export default function Navbar() {
 
                 <div className='w-full flex flex-col justify-between p-6'>
                     <div className='w-full self-start flex flex-col gap-2'>
-                        <CartItem />
-                        <CartItem />
-                        <CartItem />
-                        <CartItem />
-                        <CartItem />
-                        <CartItem />
+                        {orders.length > 0 && orders.map((item, i) => (
+                            <CartItem
+                                key={i}
+                                cart={item} />
+                        ))}
                     </div>
 
                     <div className='w-full flex flex-col gap-[30px] self-end text-white mt-[20px]'>

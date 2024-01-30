@@ -128,9 +128,7 @@ func GetProductByID(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	productId := vars["product_id"]
-	fmt.Println(productId)
 
-	// Convert the productId string to ObjectId
 	objID, err := primitive.ObjectIDFromHex(productId)
 	if err != nil {
 		// If the conversion fails, return an error response

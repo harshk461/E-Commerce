@@ -91,17 +91,15 @@ export default function Page() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const data = token ? jwtDecode<DecodedToken>(token) : null;
-    if (token === null) {
-      navigate.replace("/auth/login");
-      return;
-    }
-    const payload = {
-      "email": data?.email,
-      "id": data?.id,
-      "username": data?.username
-    };
+    if (token !== null) {
+      const payload = {
+        "email": data?.email,
+        "id": data?.id,
+        "username": data?.username
+      };
 
-    dispatch(login(payload));
+      dispatch(login(payload));
+    }
   }, [])
 
   return (

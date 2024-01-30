@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -23,6 +24,7 @@ const dbName = "Ecommerce"
 const colName = "users"
 
 var authCollection *mongo.Collection
+var productCollection *mongo.Collection
 
 func init() {
 	godotenv.Load(".env")
@@ -40,7 +42,7 @@ func init() {
 
 	fmt.Println("Mongo Database connected")
 	authCollection = client.Database(dbName).Collection(colName)
-
+	productCollection = client.Database(dbName).Collection("products")
 	//collection
 	fmt.Println("Auth COllection is ready")
 }
@@ -219,6 +221,36 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func GetAllAddresses(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	vars := mux.Vars(r)
+	userID := vars["user_id"]
+
+	// Convert the user ID string to an ObjectID
+	objectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		msg := map[string]string{"status": "error", "message": "Invalid user ID format"}
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+
+	filter := bson.D{{"_id", objectID}}
+
+	var user authmodel.User
+	err = authCollection.FindOne(context.Background(), filter).Decode(&user)
+	if err != nil {
+		msg := map[string]string{"status": "error", "message": "User not found"}
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+
+	msg := map[string]interface{}{"status": "success", "data": user.Address}
+	json.NewEncoder(w).Encode(msg)
+}
+
 type Address struct {
 	UserID      primitive.ObjectID `json:"user_id" bson:"user_id"`
 	Name        string             `json:"name" bson:"name"`
@@ -237,7 +269,7 @@ func AddAddress(w http.ResponseWriter, r *http.Request) {
 
 	var Address Address
 	json.NewDecoder(r.Body).Decode(&Address)
-
+	fmt.Println((Address))
 	newAddress := authmodel.Address{
 		ID:          primitive.NewObjectID(),
 		Name:        Address.Name,
@@ -317,10 +349,11 @@ func RemoveAddress(w http.ResponseWriter, r *http.Request) {
 }
 
 type Cart struct {
-	ID        primitive.ObjectID `json:"user_id" bson:"user_id"`
+	ID        primitive.ObjectID `json:"user_id" bson:"_id"`
 	ProductID primitive.ObjectID `json:"product_id" bson:"product_id"`
 	Name      string             `json:"product_name" bson:"product_name"`
 	Price     float64            `json:"price" bson:"price"`
+	Image     string             `json:"image" bson:"image"`
 	Quantity  int                `json:"quantity" bson:"quantity"`
 }
 
@@ -332,37 +365,54 @@ func AddToCart(w http.ResponseWriter, r *http.Request) {
 	var cartDetails Cart
 	json.NewDecoder(r.Body).Decode(&cartDetails)
 
-	cartData := authmodel.CartItem{
-		Name:      cartDetails.Name,
-		ProductID: cartDetails.ProductID,
-		Price:     cartDetails.Price,
-		Quantity:  cartDetails.Quantity,
+	filter := bson.D{
+		{"_id", cartDetails.ID},
+		{"cart.product_id", cartDetails.ProductID},
 	}
 
-	filter := bson.D{{"_id", cartDetails.ID}}
+	// Define the update operation to update the quantity
 	update := bson.D{
-		{"$push", bson.D{
-			{"cart", cartData},
-		}},
+		{"$inc", bson.D{{"cart.$.quantity", cartDetails.Quantity}}},
 	}
 
-	res, err := authCollection.UpdateOne(context.Background(), filter, update)
-
+	result, err := authCollection.UpdateOne(context.Background(), filter, update)
 	if err != nil {
-		msg := map[string]string{"status": "error", "message": "Error During Adding"}
+		// Handle error, potentially check for "no matching document" error
+		msg := map[string]string{"status": "error", "message": "Error During Updating"}
 		json.NewEncoder(w).Encode(msg)
 		return
 	}
 
-	if res.ModifiedCount == 0 {
-		msg := map[string]string{"status": "error", "message": "No Matching Document Found"}
+	// If the update didn't modify any documents, the product isn't in the cart yet
+	if result.ModifiedCount == 0 {
+		cartData := authmodel.CartItem{
+			Image:     cartDetails.Image,
+			Name:      cartDetails.Name,
+			ProductID: cartDetails.ProductID,
+			Price:     cartDetails.Price,
+			Quantity:  cartDetails.Quantity,
+		}
+
+		update = bson.D{
+			{"$push", bson.D{
+				{"cart", cartData},
+			}},
+		}
+		ft := bson.D{{"_id", cartDetails.ID}}
+		_, err := authCollection.UpdateOne(context.Background(), ft, update)
+
+		if err != nil {
+			msg := map[string]string{"status": "error", "message": "Error During Adding"}
+			json.NewEncoder(w).Encode(msg)
+			return
+		}
+
+		msg := map[string]string{"status": "success", "message": "Added Successfully"}
 		json.NewEncoder(w).Encode(msg)
-		return
+	} else {
+		msg := map[string]string{"status": "success", "message": "Quantity Updated Successfully"}
+		json.NewEncoder(w).Encode(msg)
 	}
-
-	msg := map[string]string{"status": "success", "message": "Added Successfully"}
-	json.NewEncoder(w).Encode(msg)
-
 }
 
 type RemoveCartBody struct {
@@ -405,4 +455,33 @@ func RemoveFromCart(w http.ResponseWriter, r *http.Request) {
 	// Return success message
 	msg := map[string]interface{}{"status": "success", "message": "Removed Address Successfully"}
 	json.NewEncoder(w).Encode(msg)
+}
+
+func GetAllProductFromCart(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	vars := mux.Vars(r)
+	userID := vars["user_id"]
+
+	// Convert the user ID string to an ObjectID
+	objectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		msg := map[string]string{"status": "error", "message": "Invalid user ID format"}
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+
+	filter := bson.D{{"_id", objectID}}
+
+	var user authmodel.User
+	err = authCollection.FindOne(context.Background(), filter).Decode(&user)
+	if err != nil {
+		msg := map[string]string{"status": "error", "message": "User not found"}
+		json.NewEncoder(w).Encode(msg)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user.Cart)
 }

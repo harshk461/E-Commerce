@@ -1,5 +1,6 @@
 'use client'
 
+import { login } from '@/app/Store/feattures/auth.slice'
 import Loader from '@/app/Utils/Loader/Loader'
 import PathHeader from '@/app/Utils/PathHeader/PathHeader'
 import useBase from '@/app/hooks/useBase'
@@ -9,6 +10,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
+import { useDispatch } from 'react-redux'
 
 interface LoginData {
     email: string;
@@ -23,7 +25,7 @@ export default function Login() {
     });
     const [loading, setLoading] = useState(false);
     const navigate = useRouter();
-
+    const dispatch = useDispatch();
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setData((prev) => ({
@@ -42,6 +44,14 @@ export default function Login() {
                         toast.error(res.data.message);
                         return;
                     }
+
+                    const payload = {
+                        "username": res.data.username,
+                        "email": res.data.email,
+                        "id": res.data._id,
+                    };
+                    dispatch(login(payload));
+
                     localStorage.setItem("token", res.data.token);
                     toast.success("Succesful login");
                     navigate.replace("/");

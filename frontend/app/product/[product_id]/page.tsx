@@ -10,6 +10,7 @@ import ReviewBox from '@/app/Utils/ReviewBox/ReviewBox';
 import StarRating from '@/app/Utils/StarRating/StarRating';
 import useBase from '@/app/hooks/useBase';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 import { Minus, Plus } from 'lucide-react';
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -44,9 +45,13 @@ export default function Page() {
         "reviews": [],
         "stock": 0,
     });
+    const token = localStorage.getItem('token');
+    const decodedToken = jwtDecode(token || '') as { id?: string };
+    const user_id = decodedToken;
     const { product_id } = useParams();
     const path = usePathname();
     const url = useBase();
+    const [quantity, setQuantity] = useState<number>(1);
     const [loading, setLoading] = useState(false);
     const [newReview, setnewReview] = useState<Boolean | null>(null);
     const navigate = useRouter();
@@ -55,6 +60,11 @@ export default function Page() {
         window2: 0,
         window3: 0,
     });
+
+    const handleQuantityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setQuantity(parseInt(e.target.value, 10));
+    };
+
     useEffect(() => {
         const getProduct = async () => {
             try {
@@ -66,7 +76,6 @@ export default function Page() {
                             navigate.replace("/");
                             return;
                         }
-                        console.log(res.data);
                         setProductData(res.data);
                     })
             }
@@ -80,6 +89,45 @@ export default function Page() {
 
         getProduct();
     }, [])
+
+    const addToCart = async () => {
+        if (quantity === 0) {
+            toast.error("Enter Valid Quantity");
+            return;
+        }
+
+        if (productData.stock < quantity) {
+            toast.error("Quantity is greater than available stock");
+            return;
+        }
+        try {
+            setLoading(true);
+            const payload = {
+                "user_id": user_id,
+                "product_id": product_id,
+                "product_name": productData.name,
+                "price": productData.price,
+                "quantity": +quantity,
+                "image": productData.images[0].url,
+            };
+            console.log(payload);
+            await axios.patch(url + "/auth/add-cart", payload)
+                .then(res => {
+                    if (res.data.status === 'error') {
+                        toast.error(res.data.message);
+                        return;
+                    }
+
+                    toast.success("Added to Cart");
+                })
+        }
+        catch (e) {
+            toast.error("Server Error");
+        }
+        finally {
+            setLoading(false);
+        }
+    }
     return (
         <div className='w-full flex flex-col'>
             <PathHeader path={path} />
@@ -103,19 +151,20 @@ export default function Page() {
 
                         <div className='flex gap-2 items-center'>
                             <h1>Quantity</h1>
-                            <input
-                                max="20"
-                                placeholder='#1'
-                                className='w-[70px] h-[40px] rounded-lg pl-2 outline-none bg-gray-200'
-                                type="number" />
-                        </div>
-
-                        <div className='flex items-center mt-4 text-md font-semibold text-gray-500'>
-                            <h1>Stocks:</h1>
-                            <h1>{productData.stock}</h1>
+                            <select
+                                value={quantity}
+                                onChange={handleQuantityChange}
+                                className='border-2 border-gray-400 rounded-md outline-none px-4 py-1 bg-gray-100'>
+                                {[1, 2, 3, 4, 5, 6].map((value) => (
+                                    <option key={value} value={value}>
+                                        {value}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <button
+                            onClick={addToCart}
                             className='w-full bg-blue-400 rounded-md py-2 font-semibold text-white mt-[40px] mb-[10px]'>
                             Add to Cart
                         </button>

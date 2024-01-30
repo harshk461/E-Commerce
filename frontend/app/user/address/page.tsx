@@ -1,17 +1,25 @@
 'use client'
 
+import { RootState } from '@/app/Store/store';
 import AddressBox from '@/app/Utils/AddressBox/AddressBox'
-import React, { useState } from 'react'
+import Loader from '@/app/Utils/Loader/Loader';
+import useBase from '@/app/hooks/useBase';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
+import { useSelector } from 'react-redux';
 
 interface AddressData {
+    address_id?: string;
     name: string;
     address: string;
     state: string;
     city: string;
     country: string;
     pinCode: number;
-    phone: number;
+    phoneNumber: number;
 }
 
 export default function Address() {
@@ -25,26 +33,32 @@ export default function Address() {
         'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
         'Lakshadweep', 'Delhi', 'Puducherry'];
 
+    const url = useBase();
+    const navigate = useRouter();
     const [newAddressWindow, setNewAddressWindow] = useState(false);
     const [loading, setLoading] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
+    const [addresses, setAddresses] = useState<AddressData[]>([])
+    const { user } = useSelector((state: RootState) => state.auth);
+
     const [addressData, setAddressData] = useState<AddressData>({
-        address: '',
-        name: '',
-        city: '',
-        country: 'india',
-        state: indianStates[0],
-        pinCode: 0,
-        phone: 0,
+        'address': '',
+        'name': '',
+        'city': '',
+        'country': 'india',
+        'state': indianStates[0],
+        'pinCode': 0,
+        'phoneNumber': 0,
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setAddressData((pre) => ({
             ...pre,
-            [name]: value,
+            [name]: name === 'pinCode' || name === 'phoneNumber' ? +value : value,
         }));
     }
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -54,7 +68,23 @@ export default function Address() {
                 console.log("Update");
             }
             else {
-                console.log("Add");
+                const token = localStorage.getItem('token');
+                const decodedToken = jwtDecode(token || '') as { id?: string };
+                const { id } = decodedToken;
+                setAddressData((pre) => ({
+                    ...pre,
+                    "user_id": id,
+                }))
+                console.log(addressData);
+                await axios.patch(url + "/auth/add-address", addressData)
+                    .then(res => {
+                        if (res.data.status === 'error') {
+                            toast.error(res.data.message);
+                            return;
+                        }
+                        toast.success("New Address Added");
+                        setNewAddressWindow(false);
+                    })
             }
         }
         catch (e) {
@@ -64,17 +94,63 @@ export default function Address() {
             setLoading(false);
         }
     }
+
+    useEffect(() => {
+        const getAddresses = async () => {
+            try {
+                setLoading(true);
+                const token = localStorage.getItem('token');
+                const decodedToken = jwtDecode(token || '') as { id?: string };
+                const { id } = decodedToken;
+                const response = await axios.get(url + "/auth/get-address/" + id);
+                if (response.data.status === 'error') {
+                    toast.error(response.data.message);
+                    return;
+                }
+                if (response.data.data === null) {
+                    return;
+                }
+
+                console.log(response.data.data);
+                setAddresses(response.data.data);
+            } catch (e) {
+                toast.error("Server Error");
+            } finally {
+                setLoading(false);
+            }
+        };
+        getAddresses();
+    }, [newAddressWindow]);
+
     return (
         <div className='w-full flex flex-col border-2 border-gray-200 p-6 rounded-lg'>
             <h1 className='text-2xl text-center font-semibold'>Address</h1>
 
-            {!newAddressWindow && <div className='w-full flex flex-col'>
-                <AddressBox
-                    setWindow={setNewAddressWindow}
-                    setData={setAddressData}
-                    isUpdate={setIsUpdate} />
-            </div>
-            }
+            {!newAddressWindow && addresses && addresses.length > 0 && (
+                <div className='w-full flex flex-col'>
+                    {addresses.map((item, i) => (
+                        <AddressBox
+                            key={i}
+                            address_id={item.address_id}
+                            name={item.name}
+                            address={item.address}
+                            city={item.city}
+                            state={item.state}
+                            pinCode={item.pinCode}
+                            phoneNumber={item.phoneNumber}
+                            country={item.country}
+                            setWindow={setNewAddressWindow}
+                            setData={setAddressData}
+                            isUpdate={setIsUpdate}
+                        />
+                    ))}
+                </div>
+            )}
+
+            {addresses.length === 0 && (
+                <h1 className='text-xl font-semibold text-center mt-[30px]'>No Addresses</h1>
+            )}
+
             {!newAddressWindow && <button
                 onClick={() => {
                     setNewAddressWindow(true);
@@ -85,7 +161,7 @@ export default function Address() {
                         country: 'india',
                         state: indianStates[0],
                         pinCode: 0,
-                        phone: 0,
+                        phoneNumber: 0,
                     };
                     setAddressData(data);
                     setIsUpdate(false);
@@ -142,11 +218,11 @@ export default function Address() {
                             <select
                                 required
                                 name='state'
-                                value={addressData.state}
+                                value={addressData.state.toLocaleLowerCase()}
                                 onChange={handleChange}
                                 className='w-full border-2 border-gray-400 rounded-md outline-none px-4 py-2 bg-gray-100'>
                                 {indianStates.map((state) => (
-                                    <option key={state} value={state}>
+                                    <option key={state} value={state.toLocaleLowerCase()}>
                                         {state}
                                     </option>
                                 ))}
@@ -161,7 +237,7 @@ export default function Address() {
                             <input
                                 required
                                 name='pinCode'
-                                value={addressData.pinCode > 0 ? addressData.pinCode : ''}
+                                value={addressData.pinCode}
                                 onChange={handleChange}
                                 className='w-full border-2 border-gray-400 rounded-md outline-none px-4 py-2 bg-gray-100'
                                 type="number"
@@ -187,8 +263,8 @@ export default function Address() {
                             <h1>Phone</h1>
                             <input
                                 required
-                                name='phone'
-                                value={addressData.phone > 0 ? addressData.phone : ''}
+                                name='phoneNumber'
+                                value={addressData.phoneNumber}
                                 onChange={handleChange}
                                 className='w-full border-2 border-gray-400 rounded-md outline-none px-4 py-2 bg-gray-100'
                                 type="number"
@@ -208,6 +284,7 @@ export default function Address() {
                     </div>
                 </form>
             }
+            {loading && <Loader />}
         </div>
     )
 }
