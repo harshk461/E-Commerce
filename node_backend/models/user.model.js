@@ -5,7 +5,12 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 const userSchema = new mongoose.Schema({
-
+    username: {
+        type: String,
+        required: [true, 'Please enter your username'],
+        maxLength: [30, 'Username cant exceed 30 character length'],
+        minLength: [3, 'Username should have atleast 3 character length']
+    },
     name: {
         type: String,
         required: [true, 'Please enter your name'],
@@ -38,13 +43,16 @@ const userSchema = new mongoose.Schema({
         {
             productId: {
                 type: mongoose.Schema.ObjectId,
-                ref: "Product"
+                ref: "products"
             },
             quantity: {
                 type: Number
             }
         }
     ],
+
+    resetPasswordToken: String,
+    resetPasswordExpire: Date
 });
 
 //on save event
@@ -60,6 +68,17 @@ userSchema.pre("save", async function (next) {
 //compare password
 userSchema.methods.comparePassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
+}
+
+
+userSchema.methods.getResetPassword = function () {
+    const resetToken = crypto.randomBytes(20).toString('hex');
+
+    this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
+    return resetToken;
 }
 
 module.exports = mongoose.model("user", userSchema);

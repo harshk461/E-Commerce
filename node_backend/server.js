@@ -3,8 +3,9 @@ require('dotenv').config()
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const { use } = require('./routes/user');
+const user = require('./routes/user');
 const connectDB = require('./utils/connectDB');
+const cors = require('cors');
 
 // Create an instance of the express app
 const app = express();
@@ -13,12 +14,21 @@ const app = express();
 connectDB();
 
 // Set up the middleware
+app.use(cors({
+    origin: '*'
+}));
+app.use(
+    bodyParser.urlencoded({
+        extended: false
+    })
+);
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
 
 //routes
-app.use("/auth", use);
+app.get("/", (req, res) => {
+    return res.json({ 'sd': 'sdj' });
+})
+app.use("/auth", user);
 
 // Start the server
 app.listen(3002, () => {
