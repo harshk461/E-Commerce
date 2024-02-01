@@ -155,46 +155,75 @@ exports.deleteUser = asyncHandler(
     }
 );
 
-exports.addToCart = asyncHandler(
+exports.addToCart = asyncHandler(async (req, res, next) => {
+    const productId = req.params.product_id;
+    const user_id = req.params.user_id;
+    const quantity = parseInt(req.params.q);
+
+    const user = await User.findById(user_id);
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+        return next(new ErrorHandler("Product not found", 404));
+    }
+
+    if (quantity > product.stock) {
+        return next(new ErrorHandler("Quantity is greater than available stock", 400));
+    }
+
+    if (!user) {
+        return next(new ErrorHandler("Invalid User", 404));
+    }
+
+    const existingProductInCart = user.cart.find((item) => item.productId.toString() === productId);
+
+    if (existingProductInCart) {
+        // Increment the quantity of the existing item
+        existingProductInCart.quantity += quantity;
+    } else {
+        // Create a Mongoose model instance for the cart item
+        const data = {
+            productId: productId,
+            quantity: quantity
+        }
+
+        // Push the model instance into the cart array
+        user.cart.push(data);
+    }
+
+    await user.save();
+
+    res.status(200).json({
+        success: true,
+        message: 'Product added to cart successfully',
+    });
+});
+
+
+exports.removeFromCart = asyncHandler(
     async (req, res, next) => {
-        const productId = req.params.product_id;
         const user_id = req.params.user_id;
-        const quantity = parseInt(req.params.q);
+        const product_id = req.params.product_id;
 
         const user = await User.findById(user_id);
-
-        const product = await Product.findById(productId);
-
-        if (!product) {
-            return next(new ErrorHandler("Product not found", 404));
-        }
-
-        if (quantity > product.stock) {
-            return next(new ErrorHandler("Quantity is greater than available stock", 400));
-        }
 
         if (!user) {
             return next(new ErrorHandler("Invalid User", 404));
         }
 
-        const existingProductInCart = user.cart.find((item) => item.productId.toString() === productId);
+        const productIndex = user.cart.findIndex(item => item.productId.toString() === product_id);
 
-        if (existingProductInCart) {
-            // Increment the quantity of the existing item
-            existingProductInCart.quantity += quantity;
-        } else {
-            // Add a new cart item with a new ID
-            user.cart.push({
-                productId,
-                quantity,
-            });
+        if (productIndex === -1) {
+            return next(new ErrorHandler("Product not available in cart", 404));
         }
+
+        user.cart.splice(productIndex, 1);
 
         await user.save();
 
-        res.status(200).json({
-            success: true,
-            message: 'Product added to cart successfully',
+        return res.json({
+            message: "Deleted Successfully",
         });
     }
-);
+)
