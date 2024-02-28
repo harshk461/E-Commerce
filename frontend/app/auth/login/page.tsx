@@ -1,14 +1,15 @@
 'use client'
 
-import { login } from '@/app/Store/feattures/auth.slice'
 import Loader from '@/app/Utils/Loader/Loader'
 import PathHeader from '@/app/Utils/PathHeader/PathHeader'
+import { loginUser } from '@/app/actions/authActions'
 import useBase from '@/app/hooks/useBase'
+import { useAppDispatch, useAppSelector } from '@/app/store/store'
 import axios from 'axios'
 import { Eye } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useDispatch } from 'react-redux'
 
@@ -23,9 +24,9 @@ export default function Login() {
         'email': '',
         'password': '',
     });
-    const [loading, setLoading] = useState(false);
+    const { loading } = useAppSelector(state => state.auth);
     const navigate = useRouter();
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setData((prev) => ({
@@ -36,33 +37,7 @@ export default function Login() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        try {
-            setLoading(true);
-            await axios.post(url + "/auth/login", data)
-                .then(res => {
-                    if (res.data.status === 'error') {
-                        toast.error(res.data.message);
-                        return;
-                    }
-
-                    const payload = {
-                        "username": res.data.username,
-                        "email": res.data.email,
-                        "id": res.data._id,
-                    };
-                    dispatch(login(payload));
-
-                    localStorage.setItem("token", res.data.token);
-                    toast.success("Succesful login");
-                    navigate.replace("/");
-                })
-        }
-        catch (e) {
-            toast.error("Server Error");
-        }
-        finally {
-            setLoading(false);
-        }
+        dispatch(loginUser(data));
     }
 
     return (
@@ -85,7 +60,6 @@ export default function Login() {
                         <h1 className='text-lg font-semibold'>REGISTERED CUSTOMER</h1>
                         <h1 className='text-md text-gray-500'>If you have an account, sign in with your email address.</h1>
                     </div>
-
                     <div className='flex flex-col w-full gap-2'>
                         <h1>Email<span className='text-red-400'>*</span></h1>
                         <input

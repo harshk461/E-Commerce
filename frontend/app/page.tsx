@@ -12,8 +12,6 @@ import PathHeader from './Utils/PathHeader/PathHeader';
 import { useDispatch, useSelector } from 'react-redux';
 import { JwtPayload, jwtDecode } from 'jwt-decode';
 import { useRouter } from 'next/navigation';
-import { login } from './Store/feattures/auth.slice';
-import { RootState } from './Store/store';
 
 interface ShopDataInterface {
   url: string;
@@ -85,8 +83,6 @@ export default function Page() {
     },
   ];
 
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
   const navigate = useRouter();
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -97,8 +93,6 @@ export default function Page() {
         "id": data?.id,
         "username": data?.username
       };
-
-      dispatch(login(payload));
     }
   }, [])
 

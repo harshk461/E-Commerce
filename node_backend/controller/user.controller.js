@@ -1,43 +1,80 @@
 const asyncHandler = require('../middleware/asyncHandler')
 const User = require('../models/user.model');
 const Product = require('../models/product.model');
+const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { createToken } = require('../utils/createToken');
 const ErrorHandler = require('../utils/errHandler');
+const multer = require('multer');
+const path = require('path');
+const cloudinary = require("cloudinary").v2;
 
-exports.registerUser = asyncHandler(
-    async (req, res, next) => {
-        const { username, name, email, password } = req.body;
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API_KEY,
+    api_secret: process.env.CLOUD_API_SECRET,
+});
 
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage,
+});
+
+async function handleUpload(file) {
+    const res = await cloudinary.uploader.upload(file, {
+        'resource_type': "auto",
+        "folder": "ecommerce",
+    })
+
+    return res;
+}
+
+exports.registerUser = async (req, res, next) => {
+    upload.single('image')(req, res, async (err) => {
+        if (err) {
+            return next(err); // Pass any multer errors to the error handler
+        }
+
+        const { username, name, email, password, image } = req.body;
+
+        const existingUsername = await User.findOne({ username });
+        if (existingUsername) {
+            return next(new ErrorHandler("Username already exists", 401));
+        }
+
+        const b64 = Buffer.from(req.file.buffer).toString("base64");
+        let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+        const imageUrl = (await handleUpload(dataURI)).secure_url;
         const user = await User.create({
             username, name, email, password,
             avatar: {
                 public_id: 'sample publicid',
-                url: 'sample pic'
+                url: imageUrl,
             }
         });
 
         return res.json({
-            status: "success"
-        })
-    }
-);
+            status: "success",
+            user: user
+        });
+    });
+};
+
 exports.loginUser = asyncHandler(
     async (req, res, next) => {
-        const { username, password } = req.body;
+        const { email, password } = req.body;
 
-        const user = await User.findOne({ username }).select("+password")
+        const user = await User.findOne({ email }).select("+password")
 
         if (!user) {
             return next(new ErrorHandler("Invalid User", 401))
         }
 
-        const passwordMatch = await user.comparePassword(password);
+        const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordMatch) {
             return next(new ErrorHandler("Incorrect Password", 401))
         }
-
         const data = {
             username: user.username,
             id: user._id,
@@ -105,9 +142,7 @@ exports.resetPassword = asyncHandler(
 
 exports.getUserByID = asyncHandler(
     async (req, res, next) => {
-        const user_id = req.params.id;
-
-        const user = await User.findOne({ _id: user_id });
+        const user = await User.findOne({ _id: req.user.id });
 
         if (!user) {
             return next(new ErrorHandler("Invalid User", 404));

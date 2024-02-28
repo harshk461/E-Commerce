@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
+        unique: true,
         required: [true, 'Please enter your username'],
         maxLength: [30, 'Username cant exceed 30 character length'],
         minLength: [3, 'Username should have atleast 3 character length']

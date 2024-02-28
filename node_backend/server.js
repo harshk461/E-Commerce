@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const express = require('express');
+const PORT = process.env.PORT || 3002;
 const bodyParser = require('body-parser');
 const path = require('path');
 const user = require('./routes/user');
@@ -8,6 +9,8 @@ const product = require('./routes/product');
 const orders = require('./routes/order');
 const connectDB = require('./utils/connectDB');
 const cors = require('cors');
+const errHandlerMiddleWare = require('./middleware/err');
+const ErrorHandler = require('./utils/errHandler');
 
 // Create an instance of the express app
 const app = express();
@@ -16,25 +19,17 @@ const app = express();
 connectDB();
 
 // Set up the middleware
-app.use(cors({
-    origin: '*'
-}));
-app.use(
-    bodyParser.urlencoded({
-        extended: false
-    })
-);
-app.use(bodyParser.json());
+app.use(cors({ origin: '*' }));
+app.use(express.json());
 
 //routes
-app.get("/", (req, res) => {
-    return res.json({ 'sd': 'sdj' });
-})
 app.use("/auth", user);
 app.use("/product", product)
 app.use("/order", orders)
 
+app.use(errHandlerMiddleWare)
+
 // Start the server
-app.listen(3002, () => {
-    console.log('Server started on port 3002');
+app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
 });

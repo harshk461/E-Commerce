@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
-import { logout } from '../Store/feattures/auth.slice';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const [curr, setCurr] = useState<Number | null>(null);
@@ -12,7 +11,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const dispatch = useDispatch();
 
     const handleLogout = () => {
-        dispatch(logout({}));
     }
 
     useEffect(() => {

@@ -21,14 +21,14 @@ export default function ForgotPassword() {
     const GetOTP = async () => {
         try {
             setLoading(true);
-            // await axios.get(url + "/auth/forgot-password/" + email)
-            //     .then(res => {
-            //         if (res.data.status === 'error') {
-            //             toast.error(res.data.message);
-            //             return;
-            //         }
-            //         setreceivedOTP(res.data.otp);
-            //     })
+            await axios.get(url + "/auth/forgot-password/" + email)
+                .then(res => {
+                    if (res.data.status === 'error') {
+                        toast.error(res.data.message);
+                        return;
+                    }
+                    setreceivedOTP(res.data.otp);
+                })
             setStep(2);
         }
         catch (e) {

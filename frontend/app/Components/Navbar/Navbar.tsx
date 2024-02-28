@@ -1,6 +1,5 @@
 'use client'
 
-import { RootState } from '@/app/Store/store';
 import CartItem from '@/app/Utils/CartItem/CartItem';
 import useBase from '@/app/hooks/useBase';
 import axios from 'axios';
@@ -26,7 +25,6 @@ export default function Navbar() {
     const [open, setOpen] = useState<Boolean | null>(null);
     const [cart, setCart] = useState<Boolean | null>(null);
     const [orders, setOrders] = useState<CartItem[]>([]);
-    const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
     const navigate = useRouter();
     const url = useBase();
 
@@ -51,7 +49,7 @@ export default function Navbar() {
             }
         }
 
-        getOrdersFromCart()
+        //getOrdersFromCart()
     }, [])
 
     return (
@@ -99,7 +97,7 @@ export default function Navbar() {
                 </div>
 
                 <div className='flex gap-4 text-md font-semibold'>
-                    {isAuthenticated ?
+                    {true ?
                         <div
                             onClick={() => navigate.replace("/user")}
                             className='flex items-center gap-2 cursor-pointer'>

@@ -2,11 +2,11 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Navbar from './Components/Navbar/Navbar'
-import Footer from './Components/Footer/Footer'
+// import Footer from './Components/Footer/Footer'
 import { Toaster } from 'react-hot-toast'
-import PathHeader from './Utils/PathHeader/PathHeader'
-import { usePathname } from 'next/navigation'
-import Providers from './Store/Provider'
+import { Providers } from './store/provider'
+// import PathHeader from './Utils/PathHeader/PathHeader'
+// import { usePathname } from 'next/navigation'
 
 const inter = Inter({ subsets: ['latin'] })
 
