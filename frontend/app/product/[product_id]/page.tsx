@@ -45,9 +45,7 @@ export default function Page() {
         "reviews": [],
         "stock": 0,
     });
-    const token = localStorage.getItem('token');
-    const decodedToken = jwtDecode(token || '') as { id?: string };
-    const user_id = decodedToken;
+
     const { product_id } = useParams();
     const path = usePathname();
     const url = useBase();
@@ -69,7 +67,7 @@ export default function Page() {
         const getProduct = async () => {
             try {
                 setLoading(true);
-                await axios.get(url + "/products/get/one/" + product_id)
+                await axios.get(url + "/product/get-single/" + product_id)
                     .then(res => {
                         if (res.data.status === "error") {
                             toast.error("Product Not Found");
@@ -103,26 +101,21 @@ export default function Page() {
         try {
             setLoading(true);
             const payload = {
-                "user_id": user_id,
-                "product_id": product_id,
-                "product_name": productData.name,
+                "productId": product_id,
+                "name": productData.name,
                 "price": productData.price,
                 "quantity": +quantity,
                 "image": productData.images[0].url,
             };
-            console.log(payload);
-            await axios.patch(url + "/auth/add-cart", payload)
+            const token = localStorage.getItem("token");
+            await axios.put(url + "/auth/add-to-cart", payload, { headers: { 'Authorization': 'Bearer ' + token } })
                 .then(res => {
-                    if (res.data.status === 'error') {
-                        toast.error(res.data.message);
-                        return;
-                    }
-
                     toast.success("Added to Cart");
                 })
         }
         catch (e) {
-            toast.error("Server Error");
+            console.log(e);
+            toast.error((e as any).response.data.message);
         }
         finally {
             setLoading(false);

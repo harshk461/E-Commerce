@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { setLoading, setIsAuthenticated } from '../reducers/authReducer';
+import { setLoading, setIsAuthenticated, setToken } from '../reducers/authReducer';
 import useBase from '../hooks/useBase';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -36,6 +36,14 @@ export const registerUser = (d: Object) => {
         catch (e: any) {
             toast.error((e as any).response.data.message);
             dispatch(setLoading(false));
+        }
+    }
+}
+
+export const setUser = (token: string | null) => {
+    async (dispatch: any) => {
+        if (token) {
+            dispatch(setToken(token));
         }
     }
 }

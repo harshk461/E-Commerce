@@ -190,12 +190,25 @@ exports.deleteUser = asyncHandler(
     }
 );
 
-exports.addToCart = asyncHandler(async (req, res, next) => {
-    const productId = req.params.product_id;
-    const user_id = req.params.user_id;
-    const quantity = parseInt(req.params.q);
+exports.getCartDetails = asyncHandler(
+    async (req, res, next) => {
+        const user_id = req.user._id;
+        const user = await User.findById(user_id);
 
+        if (!user) {
+            return next(new ErrorHandler("User not found", 404));
+        }
+
+        const cart = user.cart;
+        return res.status(200).json(cart);
+    }
+);
+
+exports.addToCart = asyncHandler(async (req, res, next) => {
+    const user_id = req.user._id;
     const user = await User.findById(user_id);
+
+    const { productId, quantity, name, price, image } = req.body;
 
     const product = await Product.findById(productId);
 
@@ -219,6 +232,9 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
     } else {
         // Create a Mongoose model instance for the cart item
         const data = {
+            name: name,
+            price: price,
+            image: image,
             productId: productId,
             quantity: quantity
         }
@@ -238,7 +254,7 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
 
 exports.removeFromCart = asyncHandler(
     async (req, res, next) => {
-        const user_id = req.params.user_id;
+        const user_id = req.user._id
         const product_id = req.params.product_id;
 
         const user = await User.findById(user_id);
@@ -260,5 +276,50 @@ exports.removeFromCart = asyncHandler(
         return res.json({
             message: "Deleted Successfully",
         });
+    }
+)
+
+exports.GetAllAddress = asyncHandler(
+    async (req, res, next) => {
+        const user_id = req.user._id;
+
+        const user = await User.findById(user_id);
+
+        if (!user) {
+            return next(new ErrorHandler("Invalid User", 404));
+        }
+
+        const addresses = user.addresses;
+
+        return res.status(200).json(addresses);
+    }
+)
+
+exports.AddNewAddress = asyncHandler(
+    async (req, res, next) => {
+        const user_id = req.user._id;
+
+        const { name, address, city, state, country, pincode, phone } = req.body;
+
+        const user = await User.findById(user_id);
+
+        if (!user) {
+            return next(new ErrorHandler("Invalid User", 404));
+        }
+
+        const newAddress = {
+            name,
+            address,
+            city,
+            state,
+            country,
+            pincode,
+            phone
+        };
+        user.addresses.push(newAddress);
+
+        await user.save();
+
+        return res.status(200).json({ "message": "Added new Address" });
     }
 )

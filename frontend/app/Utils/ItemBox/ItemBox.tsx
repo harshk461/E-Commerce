@@ -46,12 +46,12 @@ export default function ItemBox({ id, name, price, url, isSale, rating }: Props)
                         alt="" />
                 )}
 
-                <div
+                {/* <div
                     onClick={() => setOpenQuick(true)}
                     className={`absolute bottom-0 left-0 right-0 text-center bg-white text-lg py-2 bg-opacity-55 filter drop-shadow-m cursor-pointer
                         ${showQuick === true && 'quickO'} ${showQuick === false && 'quickC'}`}>
                     Quick View
-                </div>
+                </div> */}
             </div>
 
             <div

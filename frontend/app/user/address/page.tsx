@@ -69,26 +69,15 @@ export default function Address() {
             }
             else {
                 const token = localStorage.getItem('token');
-                const decodedToken = jwtDecode(token || '') as { id?: string };
-                const { id } = decodedToken;
-                setAddressData((pre) => ({
-                    ...pre,
-                    "user_id": id,
-                }))
-                console.log(addressData);
-                await axios.patch(url + "/auth/add-address", addressData)
+                await axios.put(url + "/auth/add-address", addressData, { headers: { Authorization: token } })
                     .then(res => {
-                        if (res.data.status === 'error') {
-                            toast.error(res.data.message);
-                            return;
-                        }
                         toast.success("New Address Added");
                         setNewAddressWindow(false);
                     })
             }
         }
         catch (e) {
-            toast.error("Server Error");
+            toast.error(e.response.data.message);
         }
         finally {
             setLoading(false);
@@ -100,21 +89,13 @@ export default function Address() {
             try {
                 setLoading(true);
                 const token = localStorage.getItem('token');
-                const decodedToken = jwtDecode(token || '') as { id?: string };
-                const { id } = decodedToken;
-                const response = await axios.get(url + "/auth/get-address/" + id);
-                if (response.data.status === 'error') {
-                    toast.error(response.data.message);
-                    return;
-                }
+                const response = await axios.get(url + "/auth/get-address/", { headers: { Authorization: token } });
                 if (response.data.data === null) {
                     return;
                 }
-
-                console.log(response.data.data);
                 setAddresses(response.data.data);
             } catch (e) {
-                toast.error("Server Error");
+                toast.error(e.response.data.message);
             } finally {
                 setLoading(false);
             }

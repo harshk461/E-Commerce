@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import PathHeader from '../Utils/PathHeader/PathHeader'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import CartProductBox from '../Utils/CartProductBox/CartProductBox'
 import { Lock, Notebook, Tag } from 'lucide-react'
 import axios from 'axios'
@@ -10,46 +10,66 @@ import useBase from '../hooks/useBase'
 import toast from 'react-hot-toast'
 import { jwtDecode } from 'jwt-decode'
 import CartItem from '../Utils/CartItem/CartItem'
+import { useAppSelector } from '../store/store'
 
-interface CartItem {
-    product_id?: string;
-    product_name: string;
+interface CartItemInterface {
+    productId?: string;
+    name: string;
     price: number;
     quantity?: number;
     image: string;
 }
 
+interface DiscountInterface {
+    type: string;
+    discount: number;
+}
 
 export default function Cart() {
-
-    const [promoWindow, setPromoWindow] = useState<Boolean | null>(false)
-    const [noteWindow, setNoteWindow] = useState<Boolean | null>(null)
-    const [orders, setOrders] = useState([]);
+    const [orders, setOrders] = useState<CartItemInterface[]>([]);
     const url = useBase();
+    const token = localStorage.getItem('token');
+
+    const navigate = useRouter();
+    const getOrdersFromCart = async () => {
+        try {
+            await axios.get(url + "/auth/get-cart", { headers: { 'Authorization': "Bearer " + token } })
+                .then(res => {
+                    setOrders(res.data);
+                })
+        }
+        catch (e) {
+            toast.error("Server Error")
+        }
+    }
 
     useEffect(() => {
-        const getOrdersFromCart = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const decodedToken = jwtDecode(token || '') as { id?: string };
-                const { id } = decodedToken;
-                await axios.get(url + "/auth/get-all-orders/" + id)
-                    .then(res => {
-                        if (res.data.status === 'error') {
-                            toast.error(res.data.message);
-                            return;
-                        }
-                        console.log(res.data);
-                        setOrders(res.data);
-                    })
-            }
-            catch (e) {
-                toast.error("Server Error")
-            }
-        }
 
         getOrdersFromCart()
     }, [])
+
+    const removeFromCart = async (id: string) => {
+        const token = localStorage.getItem('token');
+        await axios.put(url + "/auth/remove-from-cart/" + id, {}, { headers: { 'Authorization': "Bearer " + token } })
+            .then(res => {
+                getOrdersFromCart();
+                toast.success(res.data.message);
+            })
+            .catch(e => {
+                toast.error(e.response.data.message);
+            })
+    }
+
+    const getTotalAmount = () => {
+        let total = 0;
+        for (const item of orders) {
+            total += item.price;
+        }
+
+        // total = total - (discount.discount / 100) * total;
+
+        return total.toFixed(2);
+    };
     return (
         <div className='w-full h-fit flex flex-col'>
             <PathHeader path={usePathname()} />
@@ -60,42 +80,12 @@ export default function Cart() {
                     {orders.length > 0 && orders.map((item, i) => (
                         <CartItem
                             cart={item}
-                            key={i} />
+                            key={i}
+                            remove={removeFromCart} />
                     ))}
                     <div className='w-full h-[2px] bg-gray-300 my-[15px]'></div>
 
-                    <div className='flex flex-col'>
-                        <div
-                            onClick={() => setPromoWindow(!promoWindow)}
-                            className='w-fit flex items-center gap-1 cursor-pointer text-blue-400'><Tag size={20} />Enter a Promo code</div>
-                        {promoWindow && (
-                            <div className='flex my-4'>
-                                <input
-                                    className='w-full lg:w-[300px] border-2 border-gray-300 px-4 py-2 outline-none'
-                                    type="text"
-                                    placeholder='Enter Promo Code' />
-                                <button className='px-4 py-2 bg-blue-400 text-white font-semibold'>
-                                    Apply
-                                </button>
-                            </div>
-                        )}
-                    </div>
 
-                    <div className='flex flex-col mt-[10px]'>
-                        <div
-                            onClick={() => setNoteWindow(!noteWindow)}
-                            className='flex items-center gap-1 cursor-pointer text-blue-400'><Notebook size={20} />Add a Note</div>
-                        {noteWindow && (
-                            <div className='flex flex-col gap-2 my-4'>
-                                <textarea
-                                    className='max-w-full w-[400px] h-[150px] border-2 border-gray-300 px-4 py-2 outline-none resize-none rounded-md'
-                                    placeholder='Add Note' />
-                                <button className='w-fit px-6 py-2 bg-blue-400 text-white font-semibold rounded-md'>
-                                    Add
-                                </button>
-                            </div>
-                        )}
-                    </div>
                 </div>
 
                 {/* Order Summary */}
@@ -103,10 +93,15 @@ export default function Cart() {
                     <h1 className='text-lg '>Order Summary</h1>
                     <div className='w-full h-[2px] bg-gray-300 my-[15px]'></div>
 
-                    <div className='flex justify-between items-center mt-4 text-lg'>
-                        <h1>Subtotal</h1>
-                        <h1>$ 29.00</h1>
-                    </div>
+                    {orders.map((item, i) => (
+                        <div
+                            key={i}
+                            className='flex justify-between items-center mt-4 text-lg'>
+                            <h1>{item.name}</h1>
+                            <h1>$ {item.price}</h1>
+                        </div>
+                    ))}
+
                     <div className='flex justify-between items-center mt-4 text-lg'>
                         <h1>Delivery</h1>
                         <h1>FREE</h1>
@@ -116,9 +111,10 @@ export default function Cart() {
 
                     <div className='flex w-full justify-between items-center'>
                         <h1 className='text-xl'>Total</h1>
-                        <h1 className='text-xl'>$ 29.00</h1>
+                        <h1 className='text-xl'>$ {getTotalAmount()}</h1>
                     </div>
                     <button
+                        onClick={() => navigate.push("/cart/checkout")}
                         className='w-full bg-blue-400 rounded-md outline-none py-2 mt-6 mb-4 text-white font-semibold'>
                         Checkout
                     </button>
@@ -127,6 +123,6 @@ export default function Cart() {
                         <Lock size={15} /> Secure Checkout</h1>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }

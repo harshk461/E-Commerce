@@ -26,13 +26,8 @@ export default function Page() {
     useEffect(() => {
         const getData = async () => {
             try {
-                await axios.get(url + "/products/get")
+                await axios.get(url + "/product/get-all")
                     .then(res => {
-                        if (res.data.status === 'error') {
-                            toast.error(res.data.message);
-                            return;
-                        }
-                        console.log(res.data);
                         setData(res.data);
                     })
             }

@@ -75,8 +75,7 @@ export default function Type() {
             try {
                 setLoading(true);
                 const s = (type as string).split("-").join(" ");
-                console.log(url + "/products/get/" + s);
-                await axios.get(url + "/products/get/" + s)
+                await axios.get(url + "/product/get/" + s)
                     .then(res => {
                         if (res.data.status === 'error') {
                             toast.error(res.data.message);
@@ -131,7 +130,6 @@ export default function Type() {
                     setData(newData);
                     break;
                 default:
-                    // No filter, set data as is
                     setData(newData);
                     break;
             }

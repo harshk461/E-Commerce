@@ -5,16 +5,18 @@ const jwt = require('jsonwebtoken');
 
 exports.isAuthenticated = asyncHandler(
     async (req, res, next) => {
-        const token = req.headers.authorization;
-
-        if (!token) {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return next(new ErrorHandler("Login First to access this", 400));
         }
+        const token = authHeader.split(' ')[1];
 
-        const decodedToken = jwt.verify(token, process.env.secretKey);
-
-        req.user = await User.findById(decodedToken.id);
-
-        next();
+        try {
+            const decodedToken = jwt.verify(token, process.env.secretKey);
+            req.user = await User.findById(decodedToken.id);
+            next();
+        } catch (error) {
+            return next(new ErrorHandler("Invalid Token", 401));
+        }
     }
-)
+);
