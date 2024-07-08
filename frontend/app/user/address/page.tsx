@@ -1,6 +1,6 @@
 "use client";
 
-import { RootState } from "@/app/Store/store";
+import { RootState } from "@/app/store/store";
 import AddressBox from "@/app/Utils/AddressBox/AddressBox";
 import Loader from "@/app/Utils/Loader/Loader";
 import useBase from "@/app/hooks/useBase";
@@ -107,7 +107,7 @@ export default function Address() {
             setNewAddressWindow(false);
           });
       }
-    } catch (e) {
+    } catch (e: any) {
       toast.error(e.response.data.message);
     } finally {
       setLoading(false);
@@ -126,7 +126,7 @@ export default function Address() {
           return;
         }
         setAddresses(response.data.data);
-      } catch (e) {
+      } catch (e: any) {
         toast.error(e.response.data.message);
       } finally {
         setLoading(false);
