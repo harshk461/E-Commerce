@@ -50,19 +50,17 @@ export default function CheckOut() {
 
   const url = useBase();
   const [isClient, setIsClient] = useState(false);
-  let token: string | null = null;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       setIsClient(true);
-      token = localStorage.getItem("token");
       getAllAddress();
       getOrdersFromCart();
     }
   }, []);
 
   const getAllAddress = async () => {
-    if (!token) return;
+    const token = localStorage.getItem("token");
     setLoading(true);
     await axios
       .get(url + "/auth/get-address", {
@@ -78,7 +76,7 @@ export default function CheckOut() {
   };
 
   const getOrdersFromCart = async () => {
-    if (!token) return;
+    const token = localStorage.getItem("token");
     try {
       await axios
         .get(url + "/auth/get-cart", {
@@ -120,7 +118,7 @@ export default function CheckOut() {
   };
 
   const removeFromCart = async (id: string) => {
-    if (!token) return;
+    const token = localStorage.getItem("token");
     await axios
       .put(
         url + "/auth/remove-from-cart/" + id,
@@ -134,6 +132,68 @@ export default function CheckOut() {
       .catch((e) => {
         toast.error(e.response.data.message);
       });
+  };
+
+  const handleCheckout = async () => {
+    const token = localStorage.getItem("token");
+    if (!addresses.length || currAddress === -1) {
+      alert("Please select a valid address.");
+      return;
+    }
+
+    const selectedAddress = addresses[currAddress];
+
+    // Calculate prices
+    const itemsPrice = orders.reduce(
+      (acc, item) => acc + item.price * (item.quantity || 1),
+      0
+    );
+    const taxPrice = itemsPrice * 0.1; // Example tax rate
+    const shippingPrice = 50; // Example shipping price
+    const totalPrice =
+      itemsPrice + taxPrice + shippingPrice - discount.discount;
+
+    const orderData = {
+      shippingInfo: {
+        address: selectedAddress.address,
+        city: selectedAddress.city,
+        state: selectedAddress.state,
+        country: selectedAddress.country,
+        pincode: selectedAddress.pincode,
+        phone: selectedAddress.phone,
+      },
+      orderItems: orders.map((item) => ({
+        product: item.productId,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+      })),
+      paymentInfo: {
+        id: Math.random().toString(36).substr(2, 9),
+        status: "paid",
+      },
+      paidAt: new Date().toISOString(),
+      itemsPrice,
+      taxPrice,
+      shippingPrice,
+      totalPrice,
+    };
+    try {
+      setLoading(true);
+      const response = await axios.post(url + "/order/new-order", orderData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response);
+      toast.success("Order placed successfully!");
+    } catch (error) {
+      // console.log("Error placing order:", error.response.data.message);
+      toast.error("Failed to place order.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -150,16 +210,18 @@ export default function CheckOut() {
               <div
                 onClick={() => setCurrAddress(i)}
                 className={`w-[200px] p-2 flex flex-col border-2 border-black rounded-lg gap-2 ${
-                  i === currAddress && "border-yellow-400"
+                  i === currAddress ? "border-yellow-400" : ""
                 }`}
                 key={i}
               >
                 <h1 className="text-lg font-semibold">{item.name}</h1>
                 <h1 className="text-md text-gray-600">
-                  {item.address},{item.city},{item.state},{item.country},
+                  {item.address}, {item.city}, {item.state}, {item.country},{" "}
                   {item.pincode}
                 </h1>
-                <h1 className="text-md font-semibold">Phone: {item.phone}</h1>
+                <h1 className="text-md font-semibold truncate">
+                  Phone: {item.phone}
+                </h1>
               </div>
             ))}
           </div>
@@ -256,7 +318,10 @@ export default function CheckOut() {
       </div>
 
       <div className="w-fit m-auto p-6">
-        <button className="px-6 py-2 rounded-lg bg-green-500 w-fit m-auto text-white font-semibold">
+        <button
+          onClick={handleCheckout}
+          className="px-6 py-2 rounded-lg bg-green-500 w-fit m-auto text-white font-semibold"
+        >
           Confirm
         </button>
       </div>

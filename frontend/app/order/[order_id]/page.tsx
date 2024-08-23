@@ -70,7 +70,7 @@ export default function Order() {
               toast.error(res.data.message);
               return;
             }
-            console.log(res.data);
+            // console.log(res.data);
             setOrder(res.data);
           });
       } catch (e) {

@@ -12,14 +12,14 @@ import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 interface AddressData {
-  address_id?: string;
+  _id?: string;
   name: string;
   address: string;
   state: string;
   city: string;
   country: string;
-  pinCode: number;
-  phoneNumber: number;
+  pincode: string;
+  phone: string;
 }
 
 export default function Address() {
@@ -74,8 +74,8 @@ export default function Address() {
     city: "",
     country: "india",
     state: indianStates[0],
-    pinCode: 0,
-    phoneNumber: 0,
+    pincode: "",
+    phone: "",
   });
 
   const handleChange = (
@@ -86,7 +86,7 @@ export default function Address() {
     const { name, value } = e.target;
     setAddressData((pre) => ({
       ...pre,
-      [name]: name === "pinCode" || name === "phoneNumber" ? +value : value,
+      [name]: value,
     }));
   };
 
@@ -94,13 +94,21 @@ export default function Address() {
     e.preventDefault();
     try {
       setLoading(true);
+
+      // Convert pinCode and phoneNumber to numbers
+      const preparedData = {
+        ...addressData,
+        pincode: parseInt(addressData.pincode, 10),
+        phone: parseInt(addressData.phone, 10),
+      };
+      console.log(preparedData);
       if (isUpdate) {
         console.log("Update");
       } else {
         const token = localStorage.getItem("token");
         await axios
-          .put(url + "/auth/add-address", addressData, {
-            headers: { Authorization: token },
+          .put(url + "/auth/add-address", preparedData, {
+            headers: { Authorization: "Bearer " + token },
           })
           .then((res) => {
             toast.success("New Address Added");
@@ -122,10 +130,11 @@ export default function Address() {
         const response = await axios.get(url + "/auth/get-address/", {
           headers: { Authorization: "Bearer " + token },
         });
-        if (response.data.data === null) {
+        console.log(response);
+        if (response.data === null) {
           return;
         }
-        setAddresses(response.data.data);
+        setAddresses(response.data);
       } catch (e: any) {
         toast.error(e.response.data.message);
       } finally {
@@ -144,13 +153,13 @@ export default function Address() {
           {addresses.map((item, i) => (
             <AddressBox
               key={i}
-              address_id={item.address_id}
+              address_id={item._id}
               name={item.name}
               address={item.address}
               city={item.city}
               state={item.state}
-              pinCode={item.pinCode}
-              phoneNumber={item.phoneNumber}
+              pinCode={item.pincode}
+              phoneNumber={item.phone}
               country={item.country}
               setWindow={setNewAddressWindow}
               setData={setAddressData}
@@ -176,8 +185,8 @@ export default function Address() {
               city: "",
               country: "india",
               state: indianStates[0],
-              pinCode: 0,
-              phoneNumber: 0,
+              pincode: "",
+              phone: "",
             };
             setAddressData(data);
             setIsUpdate(false);
@@ -257,11 +266,11 @@ export default function Address() {
               <h1>Pincode</h1>
               <input
                 required
-                name="pinCode"
-                value={addressData.pinCode}
+                name="pincode"
+                value={addressData.pincode}
                 onChange={handleChange}
                 className="w-full border-2 border-gray-400 rounded-md outline-none px-4 py-2 bg-gray-100"
-                type="number"
+                type="text" // Keep the input type as text
                 placeholder="Enter Pincode"
               />
             </div>
@@ -285,11 +294,11 @@ export default function Address() {
               <h1>Phone</h1>
               <input
                 required
-                name="phoneNumber"
-                value={addressData.phoneNumber}
+                name="phone"
+                value={addressData.phone}
                 onChange={handleChange}
                 className="w-full border-2 border-gray-400 rounded-md outline-none px-4 py-2 bg-gray-100"
-                type="number"
+                type="text"
                 placeholder="Enter Phone"
               />
             </div>
