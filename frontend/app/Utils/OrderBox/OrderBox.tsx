@@ -54,34 +54,65 @@ export default function OrderBox({ order }: { order: Order }) {
         month: 'long',
         day: 'numeric',
     }).format(orderDate);
+    
     return (
-        <div className='w-full p-4 border-2 border-green-300 rounded-md'>
-            <div className='w-full flex justify-between items-center text-sm text-gray-400 font-semibold flex-wrap gap-2'>
-                <h1 className='word-break'>Order: {order._id}</h1>
-                <h1>Date: {formattedDate}</h1>
+        <div className='w-full bg-white rounded-lg shadow-md p-6 mb-4 transition-all duration-300 hover:shadow-lg'>
+            <div className='w-full flex justify-between items-center flex-wrap gap-2 mb-4 pb-3 border-b border-gray-200'>
+                <div className='flex flex-col'>
+                    <span className='text-xs text-gray-500'>ORDER ID</span>
+                    <h1 className='text-sm font-medium text-gray-700 break-all'>{order._id}</h1>
+                </div>
+                <div className='flex flex-col items-end'>
+                    <span className='text-xs text-gray-500'>ORDER DATE</span>
+                    <h1 className='text-sm font-medium text-gray-700'>{formattedDate}</h1>
+                </div>
+                <div className='flex items-center'>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        order.orderStatus === 'Delivered' 
+                            ? 'bg-green-100 text-green-800' 
+                            : order.orderStatus === 'Shipped' 
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                        {order.orderStatus}
+                    </span>
+                </div>
             </div>
-            <div className='w-full grid grid-cols-1 lg:grid-cols-2 gap-4 my-4'>
-                <h1 className='text-lg md:col-span-2'>Products</h1>
+            
+            <h2 className='text-lg font-semibold text-gray-800 mb-3'>Products</h2>
+            
+            <div className='w-full grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4'>
                 {order.orderItems.map((item, i) => (
                     <div
                         key={i}
-                        className='p-4 border-2 border-gray-400 rounded-md flex md:justify-between items-center flex-wrap justify-center gap-2'>
+                        className='p-4 bg-gray-50 rounded-lg flex items-center gap-4 transition-all duration-300 hover:bg-gray-100'>
                         <img
-                            className='w-[100px] h-[100px] object-cover'
+                            className='w-20 h-20 object-cover rounded-md'
                             src={item.image}
                             alt={item.name}
                         />
-                        <div className='flex flex-col flex-grow ml-4'>
-                            <h1 className='text-lg font-semibold'>{item.name}</h1>
-                            <h1>Price: {item.price}</h1>
-                            <h1>Quantity: {item.quantity}</h1>
+                        <div className='flex flex-col flex-grow'>
+                            <h3 className='text-md font-semibold text-gray-800'>{item.name}</h3>
+                            <div className='flex flex-wrap gap-4 mt-1 text-sm text-gray-600'>
+                                <span>${item.price.toFixed(2)}</span>
+                                <span>Qty: {item.quantity}</span>
+                                <span className='font-medium text-gray-800'>Total: ${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
                         </div>
                     </div>
                 ))}
             </div>
-            <Link
-                href={"/order/" + order._id}
-                className='text-green-800 underline'>Show More Details</Link>
+            
+            <div className='flex justify-between items-center'>
+                <div className='text-sm font-medium text-gray-700'>
+                    Total: <span className='text-lg font-bold text-gray-900'>${order.totalPrice.toFixed(2)}</span>
+                </div>
+                <Link
+                    href={`/order/${order._id}`}
+                    className='px-4 py-2 bg-green-600 text-white rounded-md font-medium hover:bg-green-700 transition-colors duration-300'>
+                    View Details
+                </Link>
+            </div>
         </div>
     )
 }

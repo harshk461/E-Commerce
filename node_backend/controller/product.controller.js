@@ -2,13 +2,33 @@ const Product = require('../models/product.model');
 const asyncHandler = require('../middleware/asyncHandler');
 const ErrorHandler = require('../utils/errHandler');
 
-exports.GetAllProduct = asyncHandler(
-    async (req, res, next) => {
-        const produts = await Product.find();
+exports.GetAllProduct = asyncHandler(async (req, res, next) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const type = req.query.type;
+        const skip = (page - 1) * limit;
 
-        return res.json(produts);
+        const filter = type ? { category: type } : {};
+
+        const products = await Product.find(filter).skip(skip).limit(limit);
+
+
+        res.status(200).json({ success: true, data: products });
+    } catch (error) {
+        next(error);
     }
-)
+});
+
+exports.GetAllProductCount = asyncHandler(async (req, res, next) => {
+    try {
+        const count = await Product.countDocuments();
+        res.status(200).json({ success: true, count });
+    } catch (error) {
+        next(error);
+    }
+});
+
 
 exports.GetByCategory = asyncHandler(
     async (req, res, next) => {

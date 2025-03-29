@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 
 export default function useBase() {
-    const [url, setUrl] = useState(process.env.NEXT_PUBLIC_BASE_URL);
+    const [url, setUrl] = useState('http://localhost:3002');
 
     return url;
 }

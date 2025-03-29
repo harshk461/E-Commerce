@@ -24,12 +24,12 @@ const CartItem: React.FC<Props> = ({ cart, remove }) => {
   };
 
   return (
-    <div className="w-full flex bg-white rounded-lg border-2 border-gray-300 p-2 mt-[10px] justify-between">
-      <div className="w-full flex gap-3 items-start justify-start">
+    <div className="w-full flex bg-white rounded-lg shadow-md p-4 mt-4 justify-between items-center">
+      <div className="flex items-center gap-4">
         <div>
           <Link href={`/product/${cart.productId}`}>
             <img
-              className="w-[100px] h-[100px] border-2 border-gray-300"
+              className="w-24 h-24 object-cover rounded-lg border border-gray-300"
               src={cart.image}
               alt="image"
             />
@@ -37,8 +37,8 @@ const CartItem: React.FC<Props> = ({ cart, remove }) => {
         </div>
 
         <div className="flex flex-col">
-          <h1 className="text-lg font-semibold">{cart.name}</h1>
-          <h1 className="text-md font-semibold">$ {cart.price}</h1>
+          <h1 className="text-lg font-bold">{cart.name}</h1>
+          <h1 className="text-md font-semibold">${cart.price}</h1>
           <h1 className="text-sm text-gray-600">Quantity: {cart.quantity}</h1>
           {/* <div className='border-2 border-gray-400 flex px-1 gap-1 items-center rounded-md'>
                     <Minus size={12} />
@@ -51,11 +51,11 @@ const CartItem: React.FC<Props> = ({ cart, remove }) => {
                 </div> */}
         </div>
       </div>
-      <div className="px-2">
+      <div className="flex items-center">
         {cart.productId && (
           <button
             onClick={() => handleRemoveFromCart(cart.productId as string)}
-            className="px-4 py-1 rounded-md bg-red-500 text-white font-semibold"
+            className="px-4 py-2 rounded-md bg-red-600 text-white font-medium hover:bg-red-700 transition duration-300"
           >
             Remove
           </button>

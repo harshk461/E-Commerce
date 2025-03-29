@@ -1,10 +1,7 @@
-'use client'
-
-import React, { useEffect, useState } from 'react'
-import ItemBox from '../Utils/ItemBox/ItemBox';
-import toast from 'react-hot-toast';
-import axios from 'axios';
-import useBase from '../hooks/useBase';
+// app/page.tsx
+import React from 'react';
+import { getAllProducts, getTotalProductsCount } from '../shop-action/action';
+import ProductList from './ProducList';
 
 interface ProductData {
     _id: string;
@@ -18,42 +15,41 @@ interface ProductData {
     }[]
 }
 
-export default function Page() {
-    const [data, setData] = useState<ProductData[]>([]);
-    const [loading, setLoading] = useState(false);
-    const url = useBase();
+export default async function Page() {
+    let products: ProductData[] = [];
+    let error: string | null = null;
+    let totalPages: number = 1;
 
-    useEffect(() => {
-        const getData = async () => {
-            try {
-                await axios.get(url + "/product/get-all")
-                    .then(res => {
-                        setData(res.data);
-                    })
-            }
-            catch (e) {
-                toast.error("Server Error");
-            }
-            finally {
-                setLoading(false);
-            }
+    try {
+        const currentPage: number = 1;  //Start on page 1
+        const s="";
+        const { data, error: productsError } = await getAllProducts(s,currentPage);
+        if (productsError) {
+            error = productsError;
+        } else {
+            products = data;
         }
-        getData();
-    }, [])
 
+        const ITEMS_PER_PAGE = 12;  //Set item per page for total pages count
+
+        const { count, error: countError } = await getTotalProductsCount();
+
+        if (countError) {
+            console.error("Failed to fetch total products count:", countError);
+            error = "Failed to fetch total product count.";
+        } else {
+            totalPages = Math.ceil(count / ITEMS_PER_PAGE);
+        }
+    } catch (e) {
+        error = "An unexpected error occurred.";
+        console.error(e);
+    }
 
     return (
-        <div className='w-full h-screen grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-            {data.map((item, i) => (
-                <ItemBox
-                    key={i}
-                    id={item._id}
-                    name={item.name}
-                    price={item.price}
-                    isSale={item.trending}
-                    rating={item.ratings}
-                    url={item.images} />
-            ))}
-        </div>
-    )
+        <ProductList
+            initialProducts={products}
+            initialError={error}
+            initialTotalPages={totalPages}
+        />
+    );
 }

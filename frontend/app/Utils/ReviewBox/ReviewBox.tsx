@@ -1,45 +1,40 @@
 import { Dot } from 'lucide-react';
-import React from 'react'
+import React from 'react';
 import StarRating from '../StarRating/StarRating';
 
 interface Props {
     user: string;
-    date: string;
+    date?: string;
     rating: number;
     review: string;
 }
 
 export default function ReviewBox({ user, date, rating, review }: Props) {
     return (
-        <div className='max-w-full w-[400px] p-4 rounded-lg border-2 border-gray-200 flex flex-col gap-2'>
-            <div className='flex gap-2 items-center text-[16px]'>
-                <h1>{user}</h1>
-                <Dot size={20} />
-                <h1>{date}</h1>
+        <div className='max-w-full w-[400px] p-5 rounded-lg border border-gray-300 shadow-md bg-white flex flex-col gap-3'>
+            {/* User Info */}
+            <div className='flex gap-2 items-center text-gray-700 text-sm font-medium'>
+                <span>{user}</span>
+                <Dot size={18} className='text-gray-500' />
+                <span>{date}</span>
             </div>
-            <div>
-                <div className='text-[25px] flex gap-4'>
-                    <StarRating rating={rating} />
-                    <section className="relative flex justify-center items-center">
-                        <div
-                            className="group flex justify-center transition-all rounded-full">
-                            <h1 className='text-[15px] text-blue-400'>
-                                verfied
-                            </h1>
-                            <span
-                                className="absolute w-[300px] opacity-0 group-hover:opacity-100 
-                                group-hover:-translate-y-[100%] duration-700 text-sm bg-white rounded-md shadow-md shadow-black p-4">
-                                A “Verified” badge means we’ve verified that the reviewer bought this product. It doesn’t mean that reviews without this badge are dishonest or fake, just that we haven’t been able to verify them.
-                            </span>
-                        </div>
-                    </section>
+            
+            {/* Rating Section */}
+            <div className='flex items-center gap-2'>
+                <StarRating rating={rating} />
+                <div className='relative group cursor-pointer'>
+                    <span className='text-sm text-blue-500 font-semibold'>Verified</span>
+                    <div className='absolute left-1/2 -translate-x-1/2 mt-2 w-72 p-3 text-xs bg-gray-900 text-white rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+                        A “Verified” badge means we’ve confirmed that the reviewer purchased this product. Reviews without this badge aren't necessarily fake, just unverified.
+                    </div>
                 </div>
             </div>
-
-            <div className='w-full flex flex-col gap-3'>
-                <h1 className='text-[18px] font-bold'>Highly Recommended</h1>
-                <h1>{review}</h1>
+            
+            {/* Review Content */}
+            <div className='flex flex-col gap-2'>
+                <h1 className='text-lg font-semibold text-gray-900'>Highly Recommended</h1>
+                <p className='text-gray-700 text-sm leading-relaxed'>{review}</p>
             </div>
         </div>
-    )
+    );
 }

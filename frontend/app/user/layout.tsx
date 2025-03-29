@@ -20,9 +20,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             return;
         }
     }, [])
+
     return (
         <div className='max-w-full w-[1300px] m-auto p-4 lg:p-0 flex gap-4 items-start lg:mt-[100px] mt-[50px]'>
-            <div className='w-[350px] border-2 border-gray-300 flex-col hidden md:flex'>
+            <div className='w-[350px] bg-white shadow-md rounded-lg hidden md:flex flex-col'>
+                <h1 className='text-lg font-bold p-4 border-b border-gray-300'>User Dashboard</h1>
                 <button
                     onClick={() => {
                         setCurr(1);
@@ -30,8 +32,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     }}
                     className={`w-full p-4 text-center font-semibold border-b-2
                      border-b-gray-400 text-md
-                     ${curr === 1 && 'bg-blue-400 text-white'}`}>
-                    DashBoard</button>
+                     ${curr === 1 ? 'bg-blue-400 text-white' : 'hover:bg-gray-100'}`}>
+                    Dashboard</button>
                 <button
                     onClick={() => {
                         setCurr(2);
@@ -39,7 +41,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     }}
                     className={`w-full p-4 text-center font-semibold border-b-2
                      border-b-gray-400 text-md
-                     ${curr === 2 && 'bg-blue-400 text-white'}`}>
+                     ${curr === 2 ? 'bg-blue-400 text-white' : 'hover:bg-gray-100'}`}>
                     Orders</button>
                 <button
                     onClick={() => {
@@ -48,7 +50,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     }}
                     className={`w-full p-4 text-center font-semibold border-b-2
                      border-b-gray-400 text-md
-                     ${curr === 3 && 'bg-blue-400 text-white'}`}>
+                     ${curr === 3 ? 'bg-blue-400 text-white' : 'hover:bg-gray-100'}`}>
                     Address</button>
                 <button
                     onClick={() => {
@@ -57,7 +59,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     }}
                     className={`w-full p-4 text-center font-semibold border-b-2
                      border-b-gray-400 text-md
-                     ${curr === 4 && 'bg-blue-400 text-white'}`}>
+                     ${curr === 4 ? 'bg-blue-400 text-white' : 'hover:bg-gray-100'}`}>
                     Account</button>
                 <button
                     onClick={() => {
@@ -68,7 +70,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     }}
                     className={`w-full p-4 text-center font-semibold border-b-2
                      border-b-gray-400 text-md
-                     ${curr === 5 && 'bg-blue-400 text-white'}`}>
+                     ${curr === 5 ? 'bg-blue-400 text-white' : 'hover:bg-gray-100'}`}>
                     Log Out</button>
             </div>
 

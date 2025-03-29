@@ -5,20 +5,30 @@ import Loader from '@/app/Utils/Loader/Loader';
 import PathHeader from '@/app/Utils/PathHeader/PathHeader'
 import useBase from '@/app/hooks/useBase';
 import axios from 'axios';
-import { setRequestMeta } from 'next/dist/server/request-meta';
-import { usePathname } from 'next/navigation';
-import React, { useRef, useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import React, { useState } from 'react'
 import toast from 'react-hot-toast';
 
 export default function ForgotPassword() {
-    const [showInitialWindow, setShowInitialWindow] = useState(false);
-    const [otp, setOtp] = useState('123456');
     const [step, setStep] = useState(1);
     const [email, setEmail] = useState('');
-    const [receivedOTP, setreceivedOTP] = useState('123456');
-    const url = useBase();
+    const [otp, setOtp] = useState('');
+    const [receivedOTP, setReceivedOTP] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const GetOTP = async () => {
+    const url = useBase();
+    const router = useRouter();
+
+    const getOTP = async () => {
+        if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+            toast.error("Please enter a valid email address");
+            return;
+        }
+
         try {
             setLoading(true);
             await axios.get(url + "/auth/forgot-password/" + email)
@@ -27,11 +37,13 @@ export default function ForgotPassword() {
                         toast.error(res.data.message);
                         return;
                     }
-                    setreceivedOTP(res.data.otp);
+                    setReceivedOTP(res.data.otp);
+                    toast.success("OTP sent to your email");
+                    setStep(2);
                 })
-            setStep(2);
         }
         catch (e) {
+            console.log(e);
             toast.error("Server Error");
         }
         finally {
@@ -40,9 +52,14 @@ export default function ForgotPassword() {
     }
 
     const handleVerify = () => {
+        if (!otp) {
+            toast.error("Please enter OTP");
+            return;
+        }
+
         if (receivedOTP === otp) {
             setStep(3);
-            toast.success("User Verified");
+            toast.success("Email verified successfully");
             return;
         }
         else {
@@ -52,8 +69,36 @@ export default function ForgotPassword() {
     }
 
     const changePassword = async () => {
+        if (!newPassword || !confirmPassword) {
+            toast.error("Please fill all fields");
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            toast.error("Password should be at least 6 characters");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            toast.error("Passwords do not match");
+            return;
+        }
+
         try {
             setLoading(true);
+            await axios.post(url + "/auth/reset-password", {
+                email,
+                newPassword,
+                otp: receivedOTP
+            })
+            .then(res => {
+                if (res.data.status === 'error') {
+                    toast.error(res.data.message);
+                    return;
+                }
+                toast.success("Password changed successfully");
+                router.push("/auth/login");
+            })
         }
         catch (e) {
             toast.error("Server Error");
@@ -62,6 +107,26 @@ export default function ForgotPassword() {
             setLoading(false);
         }
     }
+
+    const getPasswordStrength = (password:any) => {
+        if (!password) return '';
+        if (password.length < 6) return 'Weak';
+        if (password.length < 10) return 'Medium';
+        return 'Strong';
+    }
+
+    const getPasswordStrengthColor = (strength:any) => {
+        switch (strength) {
+            case 'Weak': return 'bg-red-500';
+            case 'Medium': return 'bg-yellow-500';
+            case 'Strong': return 'bg-green-500';
+            default: return '';
+        }
+    }
+
+    const passwordStrength = getPasswordStrength(newPassword);
+    const strengthColor = getPasswordStrengthColor(passwordStrength);
+
     return (
         <div className='w-full h-full flex flex-col'>
             <PathHeader path={usePathname()} />
@@ -71,74 +136,132 @@ export default function ForgotPassword() {
                 </div>
             </div>
 
-            <div className='flex max-w-full w-[400px] mx-auto my-[30px]'>
+            <div className='flex max-w-full w-[450px] mx-auto my-[30px]'>
+                <div className='w-full bg-white rounded-lg shadow-lg p-6'>
+                    {step === 1 && (
+                        <div className='w-full flex flex-col justify-center gap-4'>
+                            <h1 className='text-xl font-bold text-center text-gray-800 mb-2'>
+                                Reset Your Password
+                            </h1>
+                            <p className='text-md text-gray-600 text-center mb-4'>
+                                Enter your email address to receive a One-Time Password (OTP) for resetting your password.
+                            </p>
+                            <div className='flex flex-col gap-2'>
+                                <label htmlFor="email" className='font-medium text-gray-700'>Email Address</label>
+                                <input
+                                    id="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className='w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-blue-500 transition-all'
+                                    type="email"
+                                    placeholder='Enter your email address'
+                                />
+                            </div>
+                            <button
+                                onClick={getOTP}
+                                className='w-full px-4 py-3 mt-4 rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold text-white transition-all'>
+                                Send OTP
+                            </button>
+                        </div>
+                    )}
 
-                {step === 1 && <div className='max-w-full w-[400px] flex flex-col justify-center gap-4 p-4 my-4'>
-                    <h1 className='text-md font-semibold'>
-                        Enter your email address to receive a One-Time Password (OTP) for resetting your password.
-                    </h1>
-                    <input
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className='w-full px-4 py-2 border-2 rounded-lg my-4 outline-none'
-                        type="email"
-                        placeholder='Enter Email...'
-                    />
-                    <button
-                        onClick={GetOTP}
-                        className='px-4 py-2 rounded-lg bg-green-500 font-bold text-yellow-50'>
-                        Get OTP
-                    </button>
-                </div>}
+                    {step === 2 && (
+                        <div className='w-full flex flex-col justify-center gap-4'>
+                            <h1 className='text-xl font-bold text-center text-gray-800 mb-2'>Email Verification</h1>
+                            <p className='text-md text-gray-600 text-center mb-4'>
+                                We've sent a 6-digit code to {email}. Enter the code below to verify your email.
+                            </p>
+                            <div className='w-full'>
+                                <input
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    type="text"
+                                    maxLength={6}
+                                    className='w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-blue-500 transition-all text-center text-xl tracking-widest'
+                                    placeholder='Enter OTP'
+                                />
+                            </div>
+                            <button
+                                onClick={handleVerify}
+                                className='w-full px-4 py-3 mt-2 rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold text-white transition-all'>
+                                Verify OTP
+                            </button>
+                            <div className='flex justify-center mt-2 text-sm'>
+                                <span className='text-gray-600'>Didn't receive the code?</span>
+                                <button
+                                    onClick={getOTP}
+                                    className='text-blue-600 font-medium ml-2 hover:text-blue-800'>
+                                    Resend OTP
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
-                {step === 2 && <div className='max-w-full w-[400px] flex flex-col justify-center gap-4 p-4 my-4'>
-                    <h1 className='text-xl font-bold text-center'>Enter OTP for Email Verification</h1>
-                    <div className='m-auto w-full'>
-                        <input
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value)}
-                            type="text"
-                            maxLength={6}
-                            className='w-full py-3 rounded-lg shadow-md outline-none my-4 text-center'
-                            placeholder='Enter OTP'
-                        />
-                    </div>
-                    <button
-                        onClick={handleVerify}
-                        className='w-fit px-6 py-2 rounded-md bg-green-500 font-semibold text-white m-auto shadow-lg'>
-                        Verify
-                    </button>
-                    <div className='flex justify-center my-4 font-semibold'>
-                        <span>Didn't receive OTP?</span>
-                        <button
-                            onClick={GetOTP}
-                            className='text-blue-400 ml-2'>
-                            Resend OTP
-                        </button>
-                    </div>
+                    {step === 3 && (
+                        <div className='w-full flex flex-col justify-center gap-4'>
+                            <h1 className='text-xl font-bold text-center text-gray-800 mb-2'>
+                                Create New Password
+                            </h1>
+                            <p className='text-md text-gray-600 text-center mb-4'>
+                                Your identity has been verified. Set your new password.
+                            </p>
+                            <div className='flex flex-col gap-2'>
+                                <label htmlFor="newPassword" className='font-medium text-gray-700'>New Password</label>
+                                <div className='flex items-center border border-gray-300 rounded-lg px-4 py-3 focus-within:border-blue-500 transition-all'>
+                                    <input
+                                        id="newPassword"
+                                        type={showPassword ? "text" : "password"}
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        className='w-full outline-none'
+                                        placeholder='Enter new password'
+                                    />
+                                    <div 
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="cursor-pointer text-gray-500 hover:text-gray-700 ml-2">
+                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    </div>
+                                </div>
+                                {newPassword && (
+                                    <div className="w-full mt-1">
+                                        <div className="h-1 w-full bg-gray-200 rounded-full">
+                                            <div className={`h-full ${strengthColor} rounded-full`} style={{ width: passwordStrength === 'Weak' ? '33%' : passwordStrength === 'Medium' ? '66%' : '100%' }}></div>
+                                        </div>
+                                        <p className="text-xs mt-1 text-gray-500">Password strength: {passwordStrength}</p>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <div className='flex flex-col gap-2 mt-2'>
+                                <label htmlFor="confirmPassword" className='font-medium text-gray-700'>Confirm Password</label>
+                                <div className='flex items-center border border-gray-300 rounded-lg px-4 py-3 focus-within:border-blue-500 transition-all'>
+                                    <input
+                                        id="confirmPassword"
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        className='w-full outline-none'
+                                        placeholder='Confirm new password'
+                                    />
+                                    <div 
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="cursor-pointer text-gray-500 hover:text-gray-700 ml-2">
+                                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    </div>
+                                </div>
+                                {confirmPassword && newPassword !== confirmPassword && (
+                                    <p className="text-xs text-red-500">Passwords do not match</p>
+                                )}
+                            </div>
+
+                            <button
+                                onClick={changePassword}
+                                className='w-full px-4 py-3 mt-4 rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold text-white transition-all'>
+                                Reset Password
+                            </button>
+                        </div>
+                    )}
                 </div>
-                }
-
-                {/*Change Password*/}
-                {step === 3 && <div className='max-w-full w-[400px] flex flex-col justify-center gap-4 p-4 my-4'>
-                    <div className='text-xl font-semibold text-center'>
-                        Change Password
-                    </div>
-                    <input
-                        type="text"
-                        className='w-full px-4 py-2 rounded-md shadow-md shadow-gray-400 outline-none my-4'
-                        placeholder='Enter New Password' />
-                    <input
-                        type="text"
-                        className='w-full px-4 py-2 rounded-md shadow-md shadow-gray-400 outline-none mb-4'
-                        placeholder='Confirm New Password' />
-
-                    <button
-                        onClick={changePassword}
-                        className='px-8 py-2 rounded-lg  bg-green-500 font-semibold text-white w-fit m-auto'>
-                        Submit
-                    </button>
-                </div>}
             </div>
             {loading && <Loader />}
         </div>

@@ -1,13 +1,10 @@
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import StarRating from '../StarRating/StarRating';
 import ItemHover from '../ItemHover/ItemHover';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import ProductImageSlider from '../ProductImageSlider/ProductImageSlider';
 
 interface Props {
     id: string;
@@ -25,71 +22,88 @@ export default function ItemBox({ id, name, price, url, isSale, rating }: Props)
     const [showQuick, setShowQuick] = useState<Boolean | null>(null);
     const [openQuick, setOpenQuick] = useState(false);
     const path = usePathname();
+
     return (
         <Link
             href={`${'/product/' + id}`}
             onMouseEnter={() => setShowQuick(true)}
             onMouseLeave={() => setShowQuick(false)}
-            className='max-w-full m-auto flex flex-col md:p-4 my-4'>
-            <div
-                className='relative flex flex-col overflow-hidden'>
+            className="
+                group
+                relative
+                flex
+                w-fit
+                max-w-sm
+                flex-col
+                overflow-hidden
+                rounded-lg
+                bg-white
+                shadow-md
+                transition-shadow
+                duration-300
+                hover:shadow-lg
+                mx-auto
+                h-fit  /* Add height to the Link */
+            "
+        >
+            <div className="relative">
                 {isSale && (
-                    <div className='absolute top-0 left-0 px-4 py-1 bg-green-800 font-semibold text-white text-sm mt-2 w-fit'>
+                    <div className="absolute top-2 left-2 rounded-md bg-green-500 px-2 py-1 text-xs font-medium text-white">
                         Trending
                     </div>
                 )}
-
                 {url && url.length > 0 && (
                     <img
-                        className='max-w-full h-full m-auto'
                         src={url[0].url}
-                        alt="" />
+                        alt={name}
+                        className="
+                            aspect-square
+                            w-full
+                            object-cover
+                            transition-transform
+                            duration-300
+                            group-hover:scale-105
+                            h-64  /*Define image height*/
+                        "
+                    />
                 )}
-
-                {/* <div
-                    onClick={() => setOpenQuick(true)}
-                    className={`absolute bottom-0 left-0 right-0 text-center bg-white text-lg py-2 bg-opacity-55 filter drop-shadow-m cursor-pointer
-                        ${showQuick === true && 'quickO'} ${showQuick === false && 'quickC'}`}>
-                    Quick View
-                </div> */}
             </div>
 
-            <div
-                className='flex flex-col text-center mt-5 mb-2'>
-                <h1 className='text-2xl font-bold'>
-                    {name}
-                </h1>
-                <div className='w-[40px] m-auto h-[3px] bg-gray-500 my-1'>
-
+            <div className="px-4 py-3 flex flex-col justify-between h-40"> {/*Adjust height as needed*/}
+                <div>
+                    <h3 className="text-sm text-gray-700 line-clamp-2">
+                        <span aria-hidden="true" className="absolute inset-0"></span>
+                        {name}
+                    </h3>
                 </div>
-                <h1 className='text-md text-gray-500'>
-                    {price}
-                </h1>
+                <div className="mt-1.5 flex items-center justify-between text-gray-500">
+                    <p className="text-sm">
+                        ${price.toFixed(2)}
+                    </p>
+                    <div className="flex items-center">
+                        <StarRating rating={rating} />
+                        <span className="ml-2 text-xs">({rating})</span>
+                    </div>
+                </div>
             </div>
-
-            <div className='my-2 flex gap-4 items-center justify-center text-[25px]'>
-                <StarRating rating={rating} />
-                <h1 className='text-sm text-gray-500'>{rating}</h1>
-            </div>
-
-            <div
-                className='w-full flex flex-col'>
-                <button
-                    className='w-full text-center py-2 bg-blue-500 text-white font-bold rounded-lg'>
+            <div className="p-4">
+                <button className="relative block w-full rounded bg-[#4F45E4] px-5 py-3 text-sm font-medium text-white transition focus:outline-none focus:ring">
                     Add to Cart
                 </button>
             </div>
 
-            {openQuick && <ItemHover
-                id={id}
-                name={name}
-                price={"price"}
-                isSale={true}
-                rating={rating}
-                window={setOpenQuick}
-                desc={"sdkj"}
-                url={"dsjsd"}
-            />}
+            {openQuick && (
+                <ItemHover
+                    id={id}
+                    name={name}
+                    price={price.toString()}
+                    isSale={isSale}
+                    rating={rating}
+                    window={setOpenQuick}
+                    desc={"Product description"}
+                    url={url[0].url}
+                />
+            )}
         </Link>
     );
 }

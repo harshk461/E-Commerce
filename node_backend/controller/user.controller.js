@@ -42,9 +42,10 @@ exports.registerUser = async (req, res, next) => {
       return next(new ErrorHandler("Username already exists", 401));
     }
 
-    const b64 = Buffer.from(req.file.buffer).toString("base64");
-    let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-    const imageUrl = (await handleUpload(dataURI)).secure_url;
+    // const b64 = Buffer.from(req.file.buffer).toString("base64");
+    // let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+    // const imageUrl = (await handleUpload(dataURI)).secure_url;
+    const imageUrl="http://google.com";
     const user = await User.create({
       username,
       name,

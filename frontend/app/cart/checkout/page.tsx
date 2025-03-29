@@ -1,5 +1,4 @@
-"use client";
-
+'use client'
 import CartItem from "@/app/Utils/CartItem/CartItem";
 import Loader from "@/app/Utils/Loader/Loader";
 import MiniAddressBox from "@/app/Utils/MiniAddressBox/MiniAddressBox";
@@ -200,16 +199,15 @@ export default function CheckOut() {
     <div className="w-full h-full flex flex-col">
       <PathHeader path="Check-out" />
 
-      <div className="max-w-full w-[1000px] m-auto p-4 flex flex-col gap-4">
-        <div className="w-full flex flex-col gap-3 p-3 border-2 border-black rounded-md">
-          <h1 className="text-lg font-semibold text-gray-600">
-            Select Address
-          </h1>
-          <div className="w-full flex gap-2 overflow-y-scroll">
+      <div className="container mx-auto py-12 px-4 lg:px-8 flex flex-col gap-8">
+        {/* Address Selection */}
+        <div className="w-full bg-white rounded-lg shadow-md p-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Select Address</h1>
+          <div className="flex flex-wrap gap-4">
             {addresses.map((item, i) => (
               <div
                 onClick={() => setCurrAddress(i)}
-                className={`w-[200px] p-2 flex flex-col border-2 border-black rounded-lg gap-2 ${
+                className={`w-[200px] p-4 flex flex-col border-2 border-gray-300 rounded-lg gap-2 ${
                   i === currAddress ? "border-yellow-400" : ""
                 }`}
                 key={i}
@@ -227,17 +225,18 @@ export default function CheckOut() {
           </div>
         </div>
 
-        <div className="w-full flex flex-col p-3 border-2 border-black rounded-md">
-          <h1 className="text-lg font-semibold text-gray-600">Products</h1>
+        {/* Products */}
+        <div className="w-full bg-white rounded-lg shadow-md p-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Products</h1>
           {orders.length > 0 &&
             orders.map((item, i) => (
               <CartItem cart={item} key={i} remove={removeFromCart} />
             ))}
         </div>
 
-        <div className="w-full flex flex-col p-3 border-2 border-black rounded-md">
-          <h1 className="text-lg font-semibold text-gray-600">Pricing</h1>
-
+        {/* Pricing */}
+        <div className="w-full bg-white rounded-lg shadow-md p-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Pricing</h1>
           {orders.map((item, i) => (
             <div
               key={i}
@@ -249,7 +248,7 @@ export default function CheckOut() {
           ))}
           {discount.type !== "" && (
             <div className="flex w-full justify-between items-center mt-4 text-lg">
-              <h1>Coupoun ({discount.type})</h1>
+              <h1>Coupon ({discount.type})</h1>
               <h1>{discount.discount}%</h1>
             </div>
           )}
@@ -266,7 +265,8 @@ export default function CheckOut() {
           </div>
         </div>
 
-        <div className="flex flex-col">
+        {/* Promo and Note */}
+        <div className="w-full flex flex-col gap-4">
           <div
             onClick={() => setPromoWindow(!promoWindow)}
             className="w-fit flex items-center gap-1 cursor-pointer text-blue-400"
